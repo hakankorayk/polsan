@@ -37,7 +37,7 @@ export default defineConfig([
     },
   },
   {
-    files: ["e2e/**/*.ts", "*.config.{ts,js}", "vitest.setup.ts"],
+    files: ["e2e/**/*.{ts,mjs}", "*.config.{ts,js}", "vitest.setup.ts"],
     languageOptions: { globals: globals.node },
   },
   prettier,
