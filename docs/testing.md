@@ -1,6 +1,6 @@
 # Testing
 
-> **Template — filled during bootstrap.**
+> Bootstrap'ta dolduruldu (2026-10-19). ANEW çekirdek kuralları (İngilizce bölümler) aynen geçerlidir.
 
 ## The contract
 - Every acceptance criterion maps to at least one test (criterion ↔ test map lives in the plan).
@@ -8,10 +8,64 @@
 - The whole suite runs inside `scripts/check` — one command, everywhere.
 
 ## Frameworks & layout
-<!-- Test framework(s), where tests live, naming pattern. -->
+
+| Katman | Araç | Yer | Profil |
+|---|---|---|---|
+| Domain unit (saf Python, DB yok) | pytest | `backend/<modül>/tests/unit/` | fast |
+| API / entegrasyon (gerçek PostgreSQL) | pytest + pytest-django + Testcontainers | `backend/<modül>/tests/integration/` | full |
+| Mimari (FK kuralı, signals yasağı, yetkisiz uç) | pytest | `backend/tests/architecture/` | fast |
+| Modül sınırları | import-linter | `backend/pyproject.toml` `[tool.importlinter]` | fast |
+| Frontend bileşen/unit | Vitest + React Testing Library (jsdom) | `frontend/src/**/*.test.tsx` | fast |
+| Uçtan uca (e2e) | **Playwright** | `frontend/e2e/*.spec.ts` | full |
+
+**Profil ayrımı selector ile yapılır (Two speeds, kural 4):**
+- pytest: `backend/conftest.py`, `tests/integration/` altındaki her testi otomatik olarak
+  `integration` marker'ı ile işaretler. Hızlı adım `-m "not integration"`, tam adım
+  `-m integration` çalıştırır — yeni bir test her zaman tam olarak birinde koşar.
+- Vitest yalnızca `src/**/*.test.{ts,tsx}` toplar ve `e2e/`'yi hariç tutar; Playwright yalnızca
+  `e2e/` (`testDir`) toplar. Glob ile ayrım, dosya listesiyle değil.
+
+**PostgreSQL (Testcontainers):** pytest oturumu başında tek bir `postgres:17` container'ı başlatılır,
+oturum sonunda (başarısızlık dahil) fixture finalizer'ında durdurulup silinir. Ryuk reaper kapalıdır
+(`TESTCONTAINERS_RYUK_DISABLED=true`) çünkü run sonrasında yaşamaya devam eder; temizlik fixture'ın
+sorumluluğundadır. Docker çalışmıyorsa entegrasyon adımı **kırmızı** olur (sessizce atlanmaz).
+
+### Playwright (e2e)
+- Konum: `frontend/e2e/`, yapılandırma `frontend/playwright.config.ts`; paket `@playwright/test`
+  (`frontend/package.json` devDependency), tarayıcı **Chromium**, `npx playwright install chromium`
+  ile kurulur (CI'da `--with-deps`).
+- Çalıştırma: `npx playwright test --workers=1` — **headless**, tek worker, `retries: 0`
+  (flaky test R-03 ile düzeltilir, retry ile gizlenmez), `forbidOnly: true`.
+- **Uygulama yaşam döngüsünün tek sahibi Playwright `webServer`'dır** (Resource hygiene, kural 4):
+  - Backend: geçici bir test veritabanına karşı (e2e için ayrı Testcontainers PostgreSQL'i
+    `globalSetup` başlatır, `globalTeardown` durdurur) migrate + seed edilmiş
+    `uv run python manage.py runserver --noreload 127.0.0.1:8001`. `--noreload` zorunludur:
+    autoreloader ikinci bir süreç doğurur ve durdurmada geride kalabilir.
+  - Frontend: `vite build` çıktısı `vite preview --strictPort` ile sunulur (dev server değil).
+  - Komutlar `npm run`/`npx` sarmalayıcısı olmadan doğrudan verilir — Windows'ta sarmalayıcının
+    alt süreçleri Playwright durdurduğunda yetim kalabilir.
+  - `reuseExistingServer: false` — e2e her zaman kendi başlattığı uygulamaya karşı koşar; açık
+    kalmış bir geliştirme sunucusuna bağlanmaz.
+- Artefaktlar (`playwright-report/`, `test-results/`) gitignore'dadır; yalnızca hata durumunda
+  trace/screenshot üretilir (`trace: 'retain-on-failure'`). Kanıt olarak repoya konmaz (Evidence policy).
+- Seçiciler erişilebilirlik odaklıdır: `getByRole`, `getByLabel` (Türkçe etiketlerle); CSS/XPath
+  seçici yalnızca gerekçeyle.
+- Kurulum ve ilk smoke testi iskelet spec'iyle gelir; o zamana kadar `check.conf`'ta e2e adımı
+  yorum satırıdır.
 
 ## What must be tested
-<!-- e.g. every business rule (BR-n), every boundary/forbidden dependency, critical flows E2E/smoke. -->
+- **Her iş kuralı (BR-n)** en az bir testle; test adı BR numarasını içerir (`docs/domain.md`).
+- **İş Kanunu sınırları** ayrı ayrı: kıdem 1/5/6/14/15/16. yıl, yaş 18/19 ve 49/50 eşikleri
+  (BR-1, BR-2); hak ediş yıldönümü günü/öncesi (BR-3).
+- **İş günü hesabı:** hafta sonu, resmi tatil, arife yarım günü, yıl geçişi, yarım gün başlangıç/bitiş (BR-4, BR-5).
+- **Her durum geçişi** ve yasak geçişler (`docs/domain.md` invariants).
+- **Yetki:** her uç için en az bir "yetkisiz rol reddedilir" testi; başkasının kaydı → 404;
+  kendi talebini onaylama reddedilir (BR-8).
+- **Her yasak bağımlılık** bir import-linter sözleşmesi veya mimari testle (`docs/architecture.md`).
+- **E2E (Playwright):** kritik akış — çalışan talep oluşturur → yönetici onaylar → çalışan güncel
+  bakiyeyi görür; ve ret akışı. Her yeni kullanıcı akışı spec'inin "User experience" durumları
+  (boş, yükleniyor, hata, başarı, yetkisiz) bileşen testleri veya e2e ile kapsanır.
+- Kod kapsama yüzdesi eşiği **yoktur**; kanıt kabul kriteri ↔ test eşlemesidir.
 
 ## Protected-tests rule
 Weakening asserts, deleting, or skipping tests to reach green is forbidden. A red test triggers
