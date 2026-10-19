@@ -1,0 +1,36 @@
+#!/bin/sh
+# API contract check (spec 0001, AC-12; docs/architecture.md, Forbidden dependencies 6).
+# Regenerates the backend OpenAPI schema and the frontend TypeScript types into a temp dir and
+# compares them with the committed files in frontend/src/api/. A backend API change that is not
+# followed by `npm run api:generate` in frontend/ fails ./scripts/check.
+#   ./scripts/api-contract           check (exit 1 on drift)
+#   ./scripts/api-contract --write   regenerate the committed files
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+API="$ROOT/frontend/src/api"
+TMP=$(mktemp -d "${TMPDIR:-/tmp}/api-contract.XXXXXX")
+trap 'rm -rf "$TMP"' EXIT INT TERM
+
+( cd "$ROOT/backend" && uv run --frozen python manage.py spectacular \
+    --settings config.settings_test --validate --fail-on-warn --file "$TMP/openapi.yaml" )
+( cd "$ROOT/frontend" && node node_modules/openapi-typescript/bin/cli.js "$TMP/openapi.yaml" \
+    --output "$TMP/schema.d.ts" >/dev/null )
+
+if [ "${1:-}" = "--write" ]; then
+  cp "$TMP/openapi.yaml" "$TMP/schema.d.ts" "$API/"
+  echo "api-contract: regenerated frontend/src/api/openapi.yaml and schema.d.ts"
+  exit 0
+fi
+
+drift=0
+for f in openapi.yaml schema.d.ts; do
+  # --strip-trailing-cr: Windows checkouts (autocrlf) hold CRLF; the content is what matters.
+  if ! diff -u --strip-trailing-cr "$API/$f" "$TMP/$f"; then
+    drift=1
+  fi
+done
+if [ "$drift" -ne 0 ]; then
+  echo "api-contract: frontend/src/api is out of date — run 'npm run api:generate' in frontend/" >&2
+  exit 1
+fi
+echo "api-contract: frontend client matches the backend API"

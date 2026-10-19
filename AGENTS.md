@@ -1,15 +1,14 @@
 # AGENTS.md — Project Rules
 
-> **STATUS: NOT CONFIGURED.** This workspace has not been adapted to a project yet.
-> The only correct first action is the bootstrap workflow (`workflows/bootstrap.md`).
-> Until bootstrap completes and rewrites this file, do not write application code.
+> **Polsan Leave Manager** — iç izin yönetim web uygulaması (Çalışan / Yönetici / İK; İş Kanunu'na
+> göre yıllık izin). Modüler monolit: Django + DRF `backend/`, React + TS + Vite `frontend/`, PostgreSQL.
 
 ## Operating mode
 
-**Mode: unset** — bootstrap sets `lite` or `strict` (`workflows/README.md`); every workflow honors its gates.
+**Mode: lite** — bootstrap sets `lite` or `strict` (`workflows/README.md`); every workflow honors its gates.
 **Start work** with `/new-feature` in lite (it chains the segments and asks at each gate) or with
 `/analyze` in strict (one segment per role). Segment commands always stop (`workflows/segments.md`).
-**Language: unset** — bootstrap sets `chat=<xx> · docs=<xx>`; protocol fields stay English (`docs/conventions.md`).
+**Language: chat=tr · docs=tr** — bootstrap sets `chat=<xx> · docs=<xx>`; protocol fields stay English (`docs/conventions.md`).
 
 ## Invariant rules (these survive bootstrap — never delete or weaken them)
 
@@ -26,14 +25,14 @@
 
 | What | Where |
 |---|---|
-| Architecture & boundaries | `docs/architecture.md` |
-| Domain language & business rules | `docs/domain.md` |
-| Coding conventions | `docs/conventions.md` |
-| Testing rules | `docs/testing.md` |
-| Security rules | `docs/security.md` |
+| Architecture, modules & forbidden dependencies | `docs/architecture.md` |
+| Domain language (TR↔EN) & business rules (BR-n) | `docs/domain.md` |
+| Coding conventions (versions, naming, errors, data) | `docs/conventions.md` |
+| Testing rules (pytest, Vitest, Playwright e2e) | `docs/testing.md` |
+| Security rules (auth, KVKK, dependencies) | `docs/security.md` |
 | Git & branching rules | `docs/git.md` |
 | Decisions (ADRs) · roles (who may do what) | `docs/decisions/` · `docs/roles/` |
 | Specs & plans | `specs/active/` · `specs/plans/` · shipped → `specs/done/` |
 | Processes & gates · prompts & recovery ramps | `workflows/` · `prompts/` |
 | Every command: what it does, where it stops, lite vs strict | `docs/commands.md` |
-| The single verification command | `scripts/check` |
+| The single verification command | `scripts/check` (steps: `scripts/check.conf`) |

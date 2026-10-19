@@ -1,3 +1,42 @@
+## Polsan Leave Manager — geliştirme ortamı
+
+Bu repo, ANEW çalışma alanı üzerine kurulu **Polsan Leave Manager** projesidir (kurallar:
+`AGENTS.md`). Uygulamayı kendi makinenizde çalıştırmak için:
+
+**Gerekenler:** Docker (çalışır durumda) · Python 3.12 · [uv](https://docs.astral.sh/uv/)
+(`pip install --user uv`) · Node 24 + npm · Windows'ta Git Bash.
+
+```sh
+# 1. Ortam dosyası (backend/.env commit'lenmez) ve size özel gizli anahtar — kodda varsayılan yok
+cp backend/.env.example backend/.env
+key=$(python -c "import secrets; print(secrets.token_urlsafe(50))")
+sed -i "s|^DJANGO_SECRET_KEY=.*|DJANGO_SECRET_KEY=$key|" backend/.env
+
+# 2. Geliştirme veritabanı (PostgreSQL 17, yalnızca 127.0.0.1:5432)
+docker compose up -d db
+
+# 3. Backend — http://127.0.0.1:8000
+cd backend
+uv sync
+uv run --env-file .env python manage.py migrate
+uv run --env-file .env python manage.py runserver
+
+# 4. Frontend — repo kökünden açılmış ayrı bir terminalde; http://localhost:5173
+#    (/api isteklerini backend'e aktarır)
+cd frontend
+npm ci
+npm run dev
+```
+
+Tarayıcıda http://localhost:5173 açıldığında başlangıç sayfası **"Sunucu bağlantısı: Bağlı"**
+gösterir. Veritabanını durdurmak için `docker compose stop db`.
+
+**Doğrulama:** `./scripts/check` (tam; Docker gerekir) veya `./scripts/check --fast`. E2E için bir
+kerelik: `cd frontend && npx playwright install chromium`.
+**API değişikliğinden sonra:** `cd frontend && npm run api:generate` (yoksa check kırmızı olur).
+
+---
+
 # ANEW — AI Native Engineering Workspace
 
 **A general-purpose, technology-agnostic bootstrap for building software with AI — under control.**

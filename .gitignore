@@ -14,3 +14,23 @@ Thumbs.db
 
 # Claude Code personal settings (shared settings.json IS committed after init)
 .claude/settings.local.json
+
+# Python (backend/)
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node (frontend/)
+node_modules/
+dist/
+
+# Playwright (frontend/e2e) — artefacts are never evidence in the repo (docs/testing.md)
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
