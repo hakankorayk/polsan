@@ -48,7 +48,9 @@
 - Lock dosyaları (`uv.lock`, `package-lock.json`) her zaman commit'lenir; `scripts/check` bunlarla
   (`--frozen`, `npm ci`) çalışır.
 - `pip-audit` ve `npm audit --audit-level=high` CI'da **ayrı bir job** olarak çalışır; ağ bağımlı
-  olduğu için `scripts/check`'e girmez. Yüksek/kritik bulgu bir bug raporu açar.
+  olduğu için `scripts/check`'e girmez. Eşikler: **Python — bilinen her açık** kırmızıdır
+  (`pip-audit`'in önem filtresi yoktur); **npm — high ve üstü** kırmızıdır. Kırmızı audit bir
+  bug raporu açar (ya da açığı içeren yükseltme o anki işe plan onayıyla eklenir).
 
 ## Audit
 - Onay, ret, iptal ve İK bakiye düzeltmeleri `audit` modülüne yazılır: kim (UUID), ne zaman (UTC),

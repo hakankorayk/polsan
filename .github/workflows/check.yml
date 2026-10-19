@@ -46,7 +46,8 @@ jobs:
           fi
 
   # Known-vulnerability scan (docs/security.md, Dependencies). Network-dependent, so it lives here
-  # and not in scripts/check. Red on high/critical findings; not a required check in branch
+  # and not in scripts/check. Thresholds (docs/security.md): Python — any known vulnerability
+  # (pip-audit has no severity filter); npm — high and above. Not a required check in branch
   # protection — a finding opens a bug report instead of blocking unrelated PRs.
   audit:
     runs-on: ubuntu-latest
