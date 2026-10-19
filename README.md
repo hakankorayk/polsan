@@ -21,7 +21,8 @@ uv sync
 uv run --env-file .env python manage.py migrate
 uv run --env-file .env python manage.py runserver
 
-# 4. Frontend — ayrı bir terminalde; http://localhost:5173 (/api isteklerini backend'e aktarır)
+# 4. Frontend — repo kökünden açılmış ayrı bir terminalde; http://localhost:5173
+#    (/api isteklerini backend'e aktarır)
 cd frontend
 npm ci
 npm run dev
