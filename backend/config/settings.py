@@ -17,11 +17,8 @@ DEBUG = env_bool("DJANGO_DEBUG")
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 if not SECRET_KEY:
-    if not DEBUG:
-        raise ImproperlyConfigured(
-            "DJANGO_SECRET_KEY is not set. It is required unless DJANGO_DEBUG=true."
-        )
-    SECRET_KEY = "insecure-development-only-key"  # noqa: S105 — DEBUG only, never production
+    # No default in code, not even for DEBUG (docs/security.md, Secrets).
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY is not set (see backend/.env.example).")
 
 ALLOWED_HOSTS = [
     host.strip()

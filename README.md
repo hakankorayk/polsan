@@ -7,8 +7,10 @@ Bu repo, ANEW çalışma alanı üzerine kurulu **Polsan Leave Manager** projesi
 (`pip install --user uv`) · Node 24 + npm · Windows'ta Git Bash.
 
 ```sh
-# 1. Ortam dosyası (gerçek gizli değer içermez; backend/.env commit'lenmez)
+# 1. Ortam dosyası (backend/.env commit'lenmez) ve size özel gizli anahtar — kodda varsayılan yok
 cp backend/.env.example backend/.env
+key=$(python -c "import secrets; print(secrets.token_urlsafe(50))")
+sed -i "s|^DJANGO_SECRET_KEY=.*|DJANGO_SECRET_KEY=$key|" backend/.env
 
 # 2. Geliştirme veritabanı (PostgreSQL 17, yalnızca 127.0.0.1:5432)
 docker compose up -d db
