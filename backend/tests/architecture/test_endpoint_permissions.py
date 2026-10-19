@@ -1,7 +1,7 @@
 """AC-7: every endpoint declares its permissions explicitly (default deny otherwise)."""
 
 from django.urls import URLPattern, URLResolver, get_resolver
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 
 from tests.architecture.checks import undeclared_permission_violations
@@ -38,15 +38,27 @@ class _Undeclared(APIView):
     pass
 
 
+class _ExplicitlyOpen(APIView):
+    permission_classes = [AllowAny]
+
+
+class _EmptyPermissions(APIView):
+    permission_classes = []
+
+
 def test_checker_flags_undeclared_view() -> None:
     routes: list[tuple[str, type | None]] = [
         ("api/a/", _Declared),
         ("api/b/", _InheritsDeclared),
         ("api/c/", _Undeclared),
         ("plain/", None),
+        ("api/open/", _ExplicitlyOpen),
+        ("api/empty/", _EmptyPermissions),
     ]
 
     assert undeclared_permission_violations(routes) == [
         "api/c/: _Undeclared declares no permission_classes",
         "plain/: not a DRF view, permissions cannot be enforced",
+        "api/empty/: _EmptyPermissions declares empty permission_classes "
+        "(open access must be an explicit AllowAny)",
     ]

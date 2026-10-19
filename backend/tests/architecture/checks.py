@@ -67,13 +67,23 @@ def undeclared_permission_violations(routes: Iterable[tuple[str, type | None]]) 
         if view_class is None:
             violations.append(f"{route}: not a DRF view, permissions cannot be enforced")
             continue
-        declared = any(
-            "permission_classes" in vars(klass)
-            for klass in view_class.__mro__
-            if not klass.__module__.startswith("rest_framework")
+        declaring = next(
+            (
+                klass
+                for klass in view_class.__mro__
+                if not klass.__module__.startswith("rest_framework")
+                and "permission_classes" in vars(klass)
+            ),
+            None,
         )
-        if not declared:
+        if declaring is None:
             violations.append(f"{route}: {view_class.__qualname__} declares no permission_classes")
+        elif not vars(declaring)["permission_classes"]:
+            # An empty list is open access in disguise; open access must say AllowAny.
+            violations.append(
+                f"{route}: {view_class.__qualname__} declares empty permission_classes "
+                "(open access must be an explicit AllowAny)"
+            )
     return violations
 
 
