@@ -400,6 +400,7 @@ dependencies = [
 dev = [
     { name = "django-stubs", extra = ["compatible-mypy"] },
     { name = "djangorestframework-stubs" },
+    { name = "grimp" },
     { name = "import-linter" },
     { name = "pytest" },
     { name = "pytest-django" },
@@ -419,6 +420,7 @@ requires-dist = [
 dev = [
     { name = "django-stubs", extras = ["compatible-mypy"], specifier = ">=5.2,<5.3" },
     { name = "djangorestframework-stubs", specifier = ">=3.16,<3.17" },
+    { name = "grimp", specifier = ">=3.17,<4" },
     { name = "import-linter", specifier = ">=2.15" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-django", specifier = ">=4.14.0" },
