@@ -1,0 +1,65 @@
+[project]
+name = "polsan-leave-manager"
+version = "0.1.0"
+description = "Polsan Leave Manager backend"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "django>=5.2,<5.3",
+    "djangorestframework>=3.16,<3.17",
+    "drf-spectacular>=0.28",
+    "psycopg[binary]>=3.2,<4",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "django-stubs[compatible-mypy]>=5.2,<5.3",
+    "djangorestframework-stubs>=3.16,<3.17",
+    "import-linter>=2.15",
+    "pytest>=9.1.1",
+    "pytest-django>=4.14.0",
+    "ruff>=0.17.1",
+    "testcontainers[postgres]>=4.15.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "B", "UP", "S", "BLE", "SIM", "DJ"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "S603"]
+"conftest.py" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+exclude = ['\.venv/', '/migrations/']
+check_untyped_defs = true
+warn_unused_ignores = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+# Pure domain code is strictly typed (docs/conventions.md, Enforced by tooling).
+module = ["*.domain", "*.domain.*"]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_any_generics = true
+disallow_untyped_calls = true
+warn_return_any = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings_test"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings_test"
+python_files = ["test_*.py"]
+addopts = "--strict-markers"
+markers = [
+    "integration: needs a real PostgreSQL (Testcontainers); full profile only (auto-applied under tests/integration/)",
+]
