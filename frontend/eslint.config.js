@@ -24,15 +24,24 @@ export default defineConfig([
       // docs/security.md, Input & output
       "react/no-danger": "error",
       // docs/architecture.md, Forbidden dependencies 6
-      "no-restricted-globals": ["error", { name: "fetch", message: useGeneratedClient }],
+      "no-restricted-globals": [
+        "error",
+        ...["fetch", "XMLHttpRequest", "EventSource"].map((name) => ({
+          name,
+          message: useGeneratedClient,
+        })),
+      ],
       "no-restricted-properties": [
         "error",
-        { object: "window", property: "fetch", message: useGeneratedClient },
-        { object: "globalThis", property: "fetch", message: useGeneratedClient },
+        ...["window", "globalThis", "self"].map((object) => ({
+          object,
+          property: "fetch",
+          message: useGeneratedClient,
+        })),
       ],
       "no-restricted-imports": [
         "error",
-        { paths: [{ name: "axios", message: useGeneratedClient }] },
+        { patterns: [{ group: ["axios", "axios/*"], message: useGeneratedClient }] },
       ],
     },
   },
