@@ -12,7 +12,7 @@
     "lint": "eslint . && prettier --check .",
     "typecheck": "tsc --noEmit -p .",
     "test": "vitest run",
-    "e2e": "playwright test --workers=1",
+    "e2e": "node e2e/run.mjs",
     "api:generate": "sh ../scripts/api-contract --write"
   },
   "dependencies": {

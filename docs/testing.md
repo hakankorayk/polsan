@@ -35,8 +35,9 @@ sorumluluğundadır. Docker çalışmıyorsa entegrasyon adımı **kırmızı** 
 - Konum: `frontend/e2e/`, yapılandırma `frontend/playwright.config.ts`; paket `@playwright/test`
   (`frontend/package.json` devDependency), tarayıcı **Chromium**, `npx playwright install chromium`
   ile kurulur (CI'da `--with-deps`).
-- Çalıştırma: `npx playwright test --workers=1` — **headless**, tek worker, `retries: 0`
-  (flaky test R-03 ile düzeltilir, retry ile gizlenmez), `forbidOnly: true`.
+- Çalıştırma: `npm run e2e` (= `node e2e/run.mjs`; çıplak `playwright test` veritabanı olmadan
+  koşar, kullanılmaz) — **headless**, tek worker, `retries: 0` (flaky test R-03 ile düzeltilir,
+  retry ile gizlenmez), `forbidOnly: true`.
 - E2E her zaman `frontend/e2e/run.mjs` üzerinden çalışır (`check.conf` `e2e` adımı):
   **veritabanının sahibi `run.mjs`'tir** — geçici bir Testcontainers PostgreSQL 17 başlatır,
   `playwright test --workers=1`'ı bağlantı bilgisiyle çalıştırır ve container'ı `finally`
