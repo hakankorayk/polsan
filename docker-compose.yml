@@ -1,0 +1,14 @@
+# Local development database only (README, "Polsan Leave Manager — geliştirme ortamı").
+# Tests never use it: they start their own throwaway PostgreSQL (docs/testing.md).
+services:
+  db:
+    image: postgres:17-alpine
+    # POSTGRES_DB / POSTGRES_USER / POSTGRES_PASSWORD are shared with Django's settings.
+    env_file: ./backend/.env
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - leave_manager_db:/var/lib/postgresql/data
+
+volumes:
+  leave_manager_db:

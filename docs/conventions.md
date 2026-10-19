@@ -21,7 +21,12 @@
   drf-spectacular · PostgreSQL **17** · bağımlılık yönetimi **uv** (`backend/pyproject.toml` +
   `backend/uv.lock`, lock dosyası commit'lenir).
 - Frontend: Node **24 LTS** · npm (`frontend/package-lock.json` commit'lenir) · React **19** ·
-  TypeScript **5** (`strict: true`) · Vite.
+  TypeScript **5** (`strict: true`) · Vite · ESLint **9** (`eslint-plugin-react` henüz ESLint
+  10'u desteklemiyor).
+- API istemcisi: backend şeması `drf-spectacular` ile `frontend/src/api/openapi.yaml`'a, oradan
+  `openapi-typescript` ile `schema.d.ts`'e üretilir; istek atan tek nokta `openapi-fetch`
+  istemcisidir (`src/api/client.ts`). API değiştiğinde `npm run api:generate`; üretilmiş dosyalar
+  elle düzenlenmez ve `scripts/api-contract` ile check'te doğrulanır.
 - Test: pytest + pytest-django · Testcontainers (PostgreSQL) · Vitest + React Testing Library ·
   Playwright.
 - Sürüm yükseltmeleri (major) bir spec veya ADR ile yapılır.

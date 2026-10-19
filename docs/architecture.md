@@ -14,8 +14,11 @@ Gerekçe: [ADR 0001](decisions/0001-modular-monolith-django-react.md).
 
 Repo düzeni (monorepo):
 - `backend/` — Django projesi; her modül bir Django app (`backend/<modül>/`).
+  `backend/config/` composition root'tur (settings, URL'ler, herkese açık durum ucu
+  `config/health.py`); modülleri bir araya getirir, iş mantığı içermez.
 - `frontend/` — React SPA; backend'e yalnızca OpenAPI'den üretilen tipli istemciyle erişir.
 - `frontend/e2e/` — Playwright uçtan uca testleri (`docs/testing.md`).
+- `docker-compose.yml` — yalnızca yerel geliştirme veritabanı (testler kullanmaz).
 
 Her backend modülünün iç düzeni:
 - `api.py` — modülün **tek public arayüzü** (diğer modüller yalnızca bunu import eder).
@@ -49,7 +52,8 @@ Her backend modülünün iç düzeni:
 
 ## Forbidden dependencies (make them testable)
 Her madde bir import-linter sözleşmesi, ESLint kuralı veya mimari test olarak `scripts/check`
-içinde çalışır.
+içinde çalışır: 1, 4, 5 → `backend/tests/architecture/` (pytest); 2, 3 → import-linter
+(`backend/pyproject.toml`); 6 → ESLint + `scripts/api-contract`.
 1. Bir modül, başka bir modülün `api.py` dışındaki hiçbir alt modülünü (`models`, `services`,
    `domain`, `views`…) import etmez.
 2. Yukarıdaki bağımlılık yönü dışındaki modül→modül importları yasaktır; döngüler yasaktır.

@@ -13,7 +13,8 @@
 |---|---|---|---|
 | Domain unit (saf Python, DB yok) | pytest | `backend/<modül>/tests/unit/` | fast |
 | API / entegrasyon (gerçek PostgreSQL) | pytest + pytest-django + Testcontainers | `backend/<modül>/tests/integration/` | full |
-| Mimari (FK kuralı, signals yasağı, yetkisiz uç) | pytest | `backend/tests/architecture/` | fast |
+| Mimari (yalnız `api` erişimi, FK kuralı, signals yasağı, uç izin bildirimi) | pytest + grimp | `backend/tests/architecture/` | fast |
+| API sözleşmesi (backend şeması = commit'li frontend istemcisi) | `scripts/api-contract` | — | fast |
 | Modül sınırları | import-linter | `backend/pyproject.toml` `[tool.importlinter]` | fast |
 | Frontend bileşen/unit | Vitest + React Testing Library (jsdom) | `frontend/src/**/*.test.tsx` | fast |
 | Uçtan uca (e2e) | **Playwright** | `frontend/e2e/*.spec.ts` | full |
@@ -36,12 +37,17 @@ sorumluluğundadır. Docker çalışmıyorsa entegrasyon adımı **kırmızı** 
   ile kurulur (CI'da `--with-deps`).
 - Çalıştırma: `npx playwright test --workers=1` — **headless**, tek worker, `retries: 0`
   (flaky test R-03 ile düzeltilir, retry ile gizlenmez), `forbidOnly: true`.
+- E2E her zaman `frontend/e2e/run.mjs` üzerinden çalışır (`check.conf` `e2e` adımı):
+  **veritabanının sahibi `run.mjs`'tir** — geçici bir Testcontainers PostgreSQL 17 başlatır,
+  `playwright test --workers=1`'ı bağlantı bilgisiyle çalıştırır ve container'ı `finally`
+  içinde durdurur (başarısızlık ve Ctrl+C dahil). `globalSetup` kullanılmaz: Playwright
+  `webServer`'ı `globalSetup`'tan **önce** başlatır, backend veritabanını bulamazdı (plan 0001).
 - **Uygulama yaşam döngüsünün tek sahibi Playwright `webServer`'dır** (Resource hygiene, kural 4):
-  - Backend: geçici bir test veritabanına karşı (e2e için ayrı Testcontainers PostgreSQL'i
-    `globalSetup` başlatır, `globalTeardown` durdurur) migrate + seed edilmiş
-    `uv run python manage.py runserver --noreload 127.0.0.1:8001`. `--noreload` zorunludur:
-    autoreloader ikinci bir süreç doğurur ve durdurmada geride kalabilir.
-  - Frontend: `vite build` çıktısı `vite preview --strictPort` ile sunulur (dev server değil).
+  - Backend: `backend/scripts/e2e_server.py` — migrate + `runserver` autoreloader **kapalı**,
+    tek süreç, `127.0.0.1:8001`, üretim ayarları (`DEBUG=false`, e2e'ye özel test anahtarı).
+    Autoreloader ikinci bir süreç doğurur ve durdurmada geride kalabilir.
+  - Frontend: `vite build` çıktısı `vite preview --strictPort` ile `127.0.0.1:4173`'te sunulur
+    (dev server değil); `/api` backend'e proxy'lenir — sayfa ve API aynı origin.
   - Komutlar `npm run`/`npx` sarmalayıcısı olmadan doğrudan verilir — Windows'ta sarmalayıcının
     alt süreçleri Playwright durdurduğunda yetim kalabilir.
   - `reuseExistingServer: false` — e2e her zaman kendi başlattığı uygulamaya karşı koşar; açık
@@ -50,8 +56,8 @@ sorumluluğundadır. Docker çalışmıyorsa entegrasyon adımı **kırmızı** 
   trace/screenshot üretilir (`trace: 'retain-on-failure'`). Kanıt olarak repoya konmaz (Evidence policy).
 - Seçiciler erişilebilirlik odaklıdır: `getByRole`, `getByLabel` (Türkçe etiketlerle); CSS/XPath
   seçici yalnızca gerekçeyle.
-- Kurulum ve ilk smoke testi iskelet spec'iyle gelir; o zamana kadar `check.conf`'ta e2e adımı
-  yorum satırıdır.
+- Erişilebilirlik: her ekran durumunda `@axe-core/playwright` ile WCAG 2.1 AA taraması
+  (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`); ihlal testi kırmızı yapar.
 
 ## What must be tested
 - **Her iş kuralı (BR-n)** en az bir testle; test adı BR numarasını içerir (`docs/domain.md`).
