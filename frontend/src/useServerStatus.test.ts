@@ -2,7 +2,10 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { api } from "./api/client";
-import { STATUS_TIMEOUT_MS, useServerStatus } from "./useServerStatus";
+import { useServerStatus } from "./useServerStatus";
+
+/** Spec 0001, AC-4 — pinned here on purpose, not read from the implementation. */
+const SPEC_TIMEOUT_MS = 5000;
 
 vi.mock("./api/client", () => ({ api: { GET: vi.fn() } }));
 
@@ -67,7 +70,7 @@ describe("useServerStatus", () => {
     const { result } = renderHook(() => useServerStatus());
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(STATUS_TIMEOUT_MS - 1);
+      await vi.advanceTimersByTimeAsync(SPEC_TIMEOUT_MS - 1);
     });
     expect(result.current).toBe("checking");
 
