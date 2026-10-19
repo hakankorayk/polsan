@@ -11,8 +11,8 @@
 
 | Katman | Araç | Yer | Profil |
 |---|---|---|---|
-| Domain unit (saf Python, DB yok) | pytest | `backend/<modül>/tests/unit/` | fast |
-| API / entegrasyon (gerçek PostgreSQL) | pytest + pytest-django + Testcontainers | `backend/<modül>/tests/integration/` | full |
+| Domain unit (saf Python, DB yok) | pytest | `backend/<modül>/tests/unit/`; modüle ait olmayanlar `backend/tests/unit/` | fast |
+| API / entegrasyon (gerçek PostgreSQL) | pytest + pytest-django + Testcontainers | `backend/<modül>/tests/integration/`; modüle ait olmayanlar `backend/tests/integration/` | full |
 | Mimari (yalnız `api` erişimi, FK kuralı, signals yasağı, uç izin bildirimi) | pytest + grimp | `backend/tests/architecture/` | fast |
 | API sözleşmesi (backend şeması = commit'li frontend istemcisi) | `scripts/api-contract` | — | fast |
 | Modül sınırları | import-linter | `backend/pyproject.toml` `[tool.importlinter]` | fast |
@@ -26,8 +26,10 @@
 - Vitest yalnızca `src/**/*.test.{ts,tsx}` toplar ve `e2e/`'yi hariç tutar; Playwright yalnızca
   `e2e/` (`testDir`) toplar. Glob ile ayrım, dosya listesiyle değil.
 
-**PostgreSQL (Testcontainers):** pytest oturumu başında tek bir `postgres:17` container'ı başlatılır,
-oturum sonunda (başarısızlık dahil) fixture finalizer'ında durdurulup silinir. Ryuk reaper kapalıdır
+**PostgreSQL (Testcontainers):** veritabanı isteyen ilk test geldiğinde (`backend/conftest.py`,
+`django_db_modify_db_settings`) oturum başına tek bir `postgres:17-alpine` container'ı başlatılır —
+DB'siz hızlı profil hiç container başlatmaz; oturum sonunda (başarısızlık dahil) fixture
+finalizer'ında durdurulup silinir. Ryuk reaper kapalıdır
 (`TESTCONTAINERS_RYUK_DISABLED=true`) çünkü run sonrasında yaşamaya devam eder; temizlik fixture'ın
 sorumluluğundadır. Docker çalışmıyorsa entegrasyon adımı **kırmızı** olur (sessizce atlanmaz).
 
