@@ -1,0 +1,8 @@
+dist/
+node_modules/
+playwright-report/
+test-results/
+package-lock.json
+# Generated from the backend API contract (scripts/api-contract) — never hand-edited
+src/api/openapi.yaml
+src/api/schema.d.ts
