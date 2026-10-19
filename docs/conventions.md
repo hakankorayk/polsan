@@ -37,6 +37,9 @@
 - Python: modül/fonksiyon `snake_case`, sınıf `PascalCase`, sabit `UPPER_SNAKE` (ruff zorlar).
 - TypeScript: bileşen `PascalCase.tsx`, hook `useXxx.ts`, diğer dosyalar `camelCase.ts`.
 - API: `/api/<kaynak-çoğul>/` (kebab-case), JSON alanları `snake_case`.
+- API uçları yalnızca **class-based** DRF view'larıdır (`APIView` / generic view / ViewSet) ve
+  `permission_classes`'ı açıkça bildirir; `@api_view` fonksiyon view'ları kullanılmaz (uç izin
+  mimari testi onları reddeder — `backend/tests/architecture/checks.py`).
 - Testler: Python `test_<davranış>.py` / `test_<davranış>()`; frontend `<Bileşen>.test.tsx`;
   e2e `frontend/e2e/<akış>.spec.ts`. Test adı davranışı söyler, BR numarası varsa içerir
   (`test_br6_request_exceeding_available_balance_is_rejected`).
