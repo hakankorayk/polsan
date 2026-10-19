@@ -1,3 +1,7 @@
-from django.urls import URLPattern, URLResolver
+from django.urls import path
 
-urlpatterns: list[URLPattern | URLResolver] = []
+from config.health import HealthView
+
+urlpatterns = [
+    path("api/health/", HealthView.as_view(), name="health"),
+]

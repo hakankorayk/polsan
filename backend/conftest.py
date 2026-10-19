@@ -25,7 +25,7 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 def django_db_modify_db_settings(
     django_db_modify_db_settings_parallel_suffix: None,
 ) -> Iterator[None]:
-    from testcontainers.postgres import PostgresContainer
+    from testcontainers.community.postgres import PostgresContainer
 
     container = PostgresContainer("postgres:17-alpine", driver=None)
     container.start()
