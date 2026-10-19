@@ -17,9 +17,11 @@
   paths and protocol fields verbatim.
 
 ## Language & framework versions
-- Backend: Python **3.12** · Django **5.2 LTS** · Django REST Framework **3.16** ·
-  drf-spectacular · PostgreSQL **17** · bağımlılık yönetimi **uv** (`backend/pyproject.toml` +
-  `backend/uv.lock`, lock dosyası commit'lenir).
+- Backend: Python **3.12** · Django **5.2 LTS** · Django REST Framework **3.17** (≥ 3.17.2:
+  PYSEC-2026-3827/3828 düzeltmesi) · drf-spectacular · PostgreSQL **17** · bağımlılık yönetimi
+  **uv** (`backend/pyproject.toml` + `backend/uv.lock`, lock dosyası commit'lenir).
+  `djangorestframework-stubs` 3.16'da kalır: 3.17 stub'ları Django 6 stub'larını (`django-stubs`
+  6.x) gerektiriyor; Django 6'ya geçişte birlikte yükseltilir.
 - Frontend: Node **24 LTS** · npm (`frontend/package-lock.json` commit'lenir) · React **19** ·
   TypeScript **5** (`strict: true`) · Vite · ESLint **9** (`eslint-plugin-react` henüz ESLint
   10'u desteklemiyor).
