@@ -63,3 +63,79 @@ addopts = "--strict-markers"
 markers = [
     "integration: needs a real PostgreSQL (Testcontainers); full profile only (auto-applied under tests/integration/)",
 ]
+
+[tool.importlinter]
+root_packages = ["employees", "workcalendar", "balances", "leaves", "identity", "audit", "config"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Rule 2 - dependency direction: employees may use only audit"
+type = "forbidden"
+source_modules = ["employees"]
+forbidden_modules = ["workcalendar", "balances", "leaves", "identity"]
+
+[[tool.importlinter.contracts]]
+name = "Rule 2 - dependency direction: workcalendar may use only audit"
+type = "forbidden"
+source_modules = ["workcalendar"]
+forbidden_modules = ["employees", "balances", "leaves", "identity"]
+
+[[tool.importlinter.contracts]]
+name = "Rule 2 - dependency direction: balances may use only audit, employees, workcalendar"
+type = "forbidden"
+source_modules = ["balances"]
+forbidden_modules = ["leaves", "identity"]
+
+[[tool.importlinter.contracts]]
+name = "Rule 2 - dependency direction: leaves may use only audit, balances, employees, workcalendar"
+type = "forbidden"
+source_modules = ["leaves"]
+forbidden_modules = ["identity"]
+
+[[tool.importlinter.contracts]]
+name = "Rule 2 - dependency direction: identity may use only audit, employees"
+type = "forbidden"
+source_modules = ["identity"]
+forbidden_modules = ["workcalendar", "balances", "leaves"]
+
+[[tool.importlinter.contracts]]
+name = "Rule 2 - dependency direction: audit may use only no other module"
+type = "forbidden"
+source_modules = ["audit"]
+forbidden_modules = ["employees", "workcalendar", "balances", "leaves", "identity"]
+
+[[tool.importlinter.contracts]]
+name = "Rule 3 - employees.domain is pure Python"
+type = "forbidden"
+source_modules = ["employees.domain"]
+forbidden_modules = ["django", "rest_framework", "drf_spectacular", "workcalendar", "balances", "leaves", "identity", "audit"]
+
+[[tool.importlinter.contracts]]
+name = "Rule 3 - workcalendar.domain is pure Python"
+type = "forbidden"
+source_modules = ["workcalendar.domain"]
+forbidden_modules = ["django", "rest_framework", "drf_spectacular", "employees", "balances", "leaves", "identity", "audit"]
+
+[[tool.importlinter.contracts]]
+name = "Rule 3 - balances.domain is pure Python"
+type = "forbidden"
+source_modules = ["balances.domain"]
+forbidden_modules = ["django", "rest_framework", "drf_spectacular", "employees", "workcalendar", "leaves", "identity", "audit"]
+
+[[tool.importlinter.contracts]]
+name = "Rule 3 - leaves.domain is pure Python"
+type = "forbidden"
+source_modules = ["leaves.domain"]
+forbidden_modules = ["django", "rest_framework", "drf_spectacular", "employees", "workcalendar", "balances", "identity", "audit"]
+
+[[tool.importlinter.contracts]]
+name = "Rule 3 - identity.domain is pure Python"
+type = "forbidden"
+source_modules = ["identity.domain"]
+forbidden_modules = ["django", "rest_framework", "drf_spectacular", "employees", "workcalendar", "balances", "leaves", "audit"]
+
+[[tool.importlinter.contracts]]
+name = "Rule 3 - audit.domain is pure Python"
+type = "forbidden"
+source_modules = ["audit.domain"]
+forbidden_modules = ["django", "rest_framework", "drf_spectacular", "employees", "workcalendar", "balances", "leaves", "identity"]
