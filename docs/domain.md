@@ -23,6 +23,10 @@
 | Devir — `CarryOver` | Kullanılmayan yıllık iznin sonraki yıla aktarılması | Yasal zorunluluk; izin yanmaz |
 | Düzeltme — `Adjustment` | İK'nın gerekçeli manuel bakiye hareketi | |
 | Onaylayıcı — `Approver` | Talebi onaylama/reddetme yetkisi olan kişi | Yönetici; yöneticisi olmayan için İK |
+| Hesap — `Account` (`identity.User`) | Bir çalışanın uygulamaya giriş kaydı; her çalışanın en fazla bir hesabı, her hesabın tam bir çalışanı vardır | Çalışan kaydı değildir; pasif yapılır, silinmez |
+| Kullanıcı adı — `username` | Girişte kullanılan, büyük/küçük harf duyarsız, yalnız ASCII harf, rakam ve `. _ -` içeren kimlik | E-posta değildir |
+| Geçici parola — `temporary password` | İK'nın verdiği, ilk girişte değiştirilmesi zorunlu parola | `must_change_password` |
+| Rol — `Role` | Çalışan (her aktif çalışan), Yönetici (en az bir aktif doğrudan bağlısı olan), İK (açıkça verilen yetki); birlikte bulunabilir | Unvan değildir; Yönetici rolü organizasyon ağacından türer |
 
 ## Business rules
 Kaynak: 4857 sayılı İş Kanunu md. 53–56 + bootstrap görüşmesi (2026-10-19).

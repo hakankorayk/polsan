@@ -14,8 +14,13 @@ Gerekçe: [ADR 0001](decisions/0001-modular-monolith-django-react.md).
 
 Repo düzeni (monorepo):
 - `backend/` — Django projesi; her modül bir Django app (`backend/<modül>/`).
-  `backend/config/` composition root'tur (settings, URL'ler, herkese açık durum ucu
-  `config/health.py`); modülleri bir araya getirir, iş mantığı içermez.
+  `backend/config/` composition root'tur: settings, URL'ler, herkese açık durum ucu
+  (`config/health.py`), hata biçimi (`config/exceptions.py`) ve yalnız İK'ya açık yönetim
+  paneli (`config/admin.py`). Modülleri bir araya getirir; iki modülü birden gerektiren kurallar
+  (ör. "son aktif İK pasif yapılamaz") yalnızca modüllerin `api.py`'si çağrılarak burada
+  birleştirilir.
+- `backend/tests/` — modüllere ait olmayan testler (mimari, ayarlar) ve ortak test fabrikaları
+  (`tests/factories.py`); kural 1'e tabi değildir.
 - `frontend/` — React SPA; backend'e yalnızca OpenAPI'den üretilen tipli istemciyle erişir.
 - `frontend/e2e/` — Playwright uçtan uca testleri (`docs/testing.md`).
 - `docker-compose.yml` — yalnızca yerel geliştirme veritabanı (testler kullanmaz).

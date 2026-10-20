@@ -48,11 +48,14 @@
 - Branch ve commit: `docs/git.md`.
 
 ## Error handling
-- Domain katmanı iş kuralı ihlalinde tipli bir `DomainError` alt sınıfı fırlatır; her hatanın sabit
-  bir makine kodu vardır (örn. `insufficient_balance`, `overlapping_request`, `self_approval`).
-- API katmanı tek bir exception handler ile bunları **RFC 9457 `application/problem+json`**
-  yanıtına çevirir: `type`, `title`, `status`, `code` (makine kodu), `detail` (Türkçe kullanıcı
-  mesajı). Doğrulama hataları alan bazında `errors` listesi ile döner.
+- Domain katmanı iş kuralı ihlalinde tipli bir exception fırlatır; her hatanın sabit bir makine
+  kodu vardır (örn. `self_manager`, `manager_cycle`; ileride `insufficient_balance`).
+- View, domain hatasını kodu ve Türkçe mesajı olan bir DRF `APIException`'a çevirir. Tek exception
+  handler (`config/exceptions.py`) her hatayı **RFC 9457 `application/problem+json`** yanıtına
+  çevirir: `type`, `title`, `status`, `code` (makine kodu), `detail` (Türkçe kullanıcı mesajı).
+  Doğrulama hataları `code = validation_error` ve alan bazında `errors` ile döner.
+- Bugünkü kodlar: `invalid_credentials`, `login_locked`, `csrf_failed`, `not_authenticated`,
+  `password_change_required`, `password_change_not_required`, `validation_error`, `server_error`.
 - Stack trace, SQL, dosya yolu, iç kimlik veya başka kullanıcının verisi **asla** yanıta sızmaz.
   Beklenmeyen hata → 500 + genel mesaj; ayrıntı sunucu loguna (kişisel veri yerine ID ile).
 - `except Exception: pass` ve hatayı yutan geniş `except` yasaktır (ruff `BLE`, `S110`).
