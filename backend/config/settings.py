@@ -70,6 +70,23 @@ DATABASES = {
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Accounts (spec 0002; docs/security.md, AuthN / AuthZ; ADR 0003)
+AUTH_USER_MODEL = "identity.User"
+AUTHENTICATION_BACKENDS = ["identity.backends.EmployeeAwareBackend"]
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+]
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 12},
+    },
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
 LANGUAGE_CODE = "tr"
 TIME_ZONE = "Europe/Istanbul"
 USE_I18N = True
