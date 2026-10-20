@@ -51,10 +51,19 @@ def _store(row: LoginThrottle, state: ThrottleState, now: datetime) -> None:
 
 def _purge_stale(now: datetime) -> None:
     """Rows nobody needs any more: no failure inside the window and no running lock. Unknown
-    usernames never succeed, so without this the table would only grow (review M4)."""
-    LoginThrottle.objects.filter(updated_at__lt=now - max(WINDOW, LOCK_DURATION)).exclude(
-        locked_until__gt=now
-    ).delete()
+    usernames never succeed, so without this the table would only grow (review M4).
+
+    Runs in its own short transaction AFTER the login transaction, and skips rows another
+    transaction holds: purging inside the login transaction deadlocked two concurrent failures
+    on two stale rows (review N1, test_throttle_concurrency.py)."""
+    with transaction.atomic():
+        stale = list(
+            LoginThrottle.objects.select_for_update(skip_locked=True)
+            .filter(updated_at__lt=now - max(WINDOW, LOCK_DURATION))
+            .exclude(locked_until__gt=now)
+            .values_list("pk", flat=True)
+        )
+        LoginThrottle.objects.filter(pk__in=stale).delete()
 
 
 def log_in(request: HttpRequest, username: str, password: str) -> User:
@@ -68,6 +77,7 @@ def log_in(request: HttpRequest, username: str, password: str) -> User:
         row = LoginThrottle.objects.select_for_update().filter(username=key).first()
         state = _state(row) if row else ThrottleState()
         user = None
+        failed = False
         if not is_locked(state, now):
             user = authenticate(request, username=key, password=password)
             if isinstance(user, User):
@@ -79,7 +89,9 @@ def log_in(request: HttpRequest, username: str, password: str) -> User:
                 row, _ = LoginThrottle.objects.select_for_update().get_or_create(username=key)
                 state = register_failure(_state(row), now)
                 _store(row, state, now)
-                _purge_stale(now)
+                failed = True
+    if failed:
+        _purge_stale(now)  # outside the login transaction: no lock is held here (N1)
     if is_locked(state, now):
         raise LoginLockedError
     if not isinstance(user, User):
