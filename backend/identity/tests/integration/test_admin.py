@@ -5,6 +5,7 @@ from django.test import Client
 from rest_framework.test import APIClient
 
 from employees.api import get_employee
+from identity.api import active_hr_count
 from identity.models import User
 from identity.tests.integration.conftest import PASSWORD, log_in
 from tests.factories import find_employee
@@ -123,12 +124,7 @@ def test_reset_to_temporary_forces_change_again(hr_client, make_user) -> None:
 
     response = hr_client.post(
         f"/admin/identity/user/{user.pk}/change/",
-        {
-            "username": "kalici",
-            "employee": user.employee_id,
-            "is_active": "on",
-            "temporary_password": TEMP,
-        },
+        {"username": "kalici", "is_active": "on", "temporary_password": TEMP},
     )
     user.refresh_from_db()
 
@@ -139,7 +135,7 @@ def test_reset_to_temporary_forces_change_again(hr_client, make_user) -> None:
 
 
 def _account_form(user: User, *, is_hr: bool, is_active: bool) -> dict:
-    data: dict = {"username": user.username, "employee": user.employee_id}
+    data: dict = {"username": user.username}
     if is_hr:
         data["is_hr"] = "on"
     if is_active:
@@ -196,3 +192,20 @@ def test_accounts_and_employees_cannot_be_deleted(hr_client, make_user) -> None:
     ):
         assert hr_client.post(url, {"post": "yes"}).status_code == 403
     assert User.objects.filter(pk=user.pk).exists()
+
+
+def test_account_cannot_be_relinked_to_another_employee(make_user, make_employee) -> None:
+    hr = make_user("ik", employee=make_employee("Tek", "İK"), is_hr=True)
+    former = make_employee("Eski", "Çalışan", active=False)
+    client = Client()
+    client.force_login(hr)
+    data = _account_form(hr, is_hr=True, is_active=True)
+    data["employee"] = former.pk
+
+    response = client.post(f"/admin/identity/user/{hr.pk}/change/", data)
+    hr.refresh_from_db()
+
+    assert response.status_code == 302  # saved, but the employee field is ignored (read-only)
+    assert hr.employee_id != former.pk
+    assert active_hr_count() == 1
+    assert client.get("/admin/").status_code == 200

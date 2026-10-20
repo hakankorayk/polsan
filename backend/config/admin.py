@@ -97,9 +97,11 @@ class AccountCreationForm(TemporaryPasswordMixin):
 
 
 class AccountChangeForm(TemporaryPasswordMixin):
+    # No "employee": an account stays bound to the same person for life (spec 0002, Req 3) —
+    # re-linking it to an inactive employee would also bypass the last-HR guard (review M1).
     class Meta:
         model = User
-        fields = ["username", "employee", "is_active", "is_hr"]
+        fields = ["username", "is_active", "is_hr"]
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -128,9 +130,19 @@ class AccountAdmin(NoDeleteAdmin):
         kwargs["form"] = AccountChangeForm if obj else AccountCreationForm
         return super().get_form(request, obj, change, **kwargs)
 
+    def get_readonly_fields(self, request: HttpRequest, obj: Any = None) -> tuple[str, ...]:
+        return ("employee", *self.readonly_fields) if obj else self.readonly_fields
+
     def get_fields(self, request: HttpRequest, obj: Any = None) -> tuple[str, ...]:
-        base = ("username", "employee", "is_hr", "temporary_password")
-        return (*base, "is_active", *self.readonly_fields) if obj else base
+        if obj:
+            return (
+                "username",
+                "is_hr",
+                "temporary_password",
+                "is_active",
+                *self.get_readonly_fields(request, obj),
+            )
+        return ("username", "employee", "is_hr", "temporary_password")
 
 
 hr_admin_site.register(Employee, EmployeeAdmin)
