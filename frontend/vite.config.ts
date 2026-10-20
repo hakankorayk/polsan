@@ -3,8 +3,11 @@ import { defineConfig } from "vite";
 
 // The SPA and the API share one origin (docs/security.md): the dev server and `vite preview`
 // proxy /api to Django. API_TARGET points at the backend (e2e uses its own port).
+const target = process.env.API_TARGET ?? "http://127.0.0.1:8000";
 const proxy = {
-  "/api": { target: process.env.API_TARGET ?? "http://127.0.0.1:8000" },
+  "/api": { target },
+  "/admin": { target }, // HR admin site (spec 0002)
+  "/static": { target }, // admin assets; Django serves them only with DEBUG (dev)
 };
 
 export default defineConfig({
