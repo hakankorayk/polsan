@@ -86,8 +86,12 @@ export function App() {
             notice={screen.notice}
             onSuccess={(mustChange) => {
               markSession();
-              if (mustChange) setScreen({ kind: "password" });
-              else void loadProfile(true);
+              if (mustChange) {
+                setScreen({ kind: "password" });
+              } else {
+                setScreen({ kind: "loading" }); // no second submit while the profile loads (L8)
+                void loadProfile(true);
+              }
             }}
           />
         </StartPage>

@@ -45,4 +45,15 @@ describe("HomePage", () => {
 
     expect(screen.queryByRole("region", { name: "Ekibim" })).not.toBeInTheDocument();
   });
+
+  it("renders two reports with the same name without key collisions (L8)", () => {
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    const twins = { ...manager, team: [manager.team![0], manager.team![0]] };
+
+    render(<HomePage profile={twins} loggingOut={false} onLogout={vi.fn()} />);
+
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    expect(errors).not.toHaveBeenCalled();
+    errors.mockRestore();
+  });
 });

@@ -26,8 +26,9 @@ export function HomePage({ profile, loggingOut, onLogout }: Props) {
         <section aria-labelledby="team-heading">
           <h2 id="team-heading">Ekibim</h2>
           <ul>
-            {profile.team.map((member) => (
-              <li key={`${member.last_name}-${member.first_name}`}>
+            {profile.team.map((member, index) => (
+              // Two reports may share a name; the server's order is stable (review L8).
+              <li key={`${index}-${member.last_name}-${member.first_name}`}>
                 {member.first_name} {member.last_name}
               </li>
             ))}

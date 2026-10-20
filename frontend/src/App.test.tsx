@@ -103,4 +103,31 @@ describe("App", () => {
       ),
     );
   });
+
+  it("shows loading, not the form, while the profile loads after login (L8)", async () => {
+    let resolveMe!: (value: unknown) => void;
+    let meCalls = 0;
+    get.mockImplementation(((path: string) => {
+      if (path === "/api/health/") return Promise.resolve(ok({ status: "ok" }));
+      if (path === "/api/auth/csrf/") return Promise.resolve({ response: new Response(null) });
+      meCalls += 1;
+      if (meCalls === 1) return Promise.resolve(problem(403, "not_authenticated"));
+      return new Promise((r) => (resolveMe = r));
+    }) as never);
+    post.mockResolvedValue(ok({ must_change_password: false }) as never);
+    render(<App />);
+
+    fireEvent.change(await screen.findByLabelText("Kullanıcı adı"), {
+      target: { value: "ayilmaz" },
+    });
+    fireEvent.change(screen.getByLabelText("Parola"), { target: { value: "Guclu-Parola-2026!" } });
+    fireEvent.click(screen.getByRole("button", { name: "Giriş yap" }));
+
+    expect(await screen.findByText("Yükleniyor…")).toBeInTheDocument();
+    expect(screen.queryByRole("form", { name: "Giriş" })).not.toBeInTheDocument();
+    resolveMe(ok(profile));
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Hoş geldiniz, Ayşe Yılmaz" }),
+    ).toBeVisible();
+  });
 });

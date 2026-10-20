@@ -55,6 +55,7 @@ export function LoginForm({ notice, onSuccess }: Props) {
       return;
     }
     setSubmitting(true);
+    let succeeded = false;
     try {
       const send = () => api.POST("/api/auth/login/", { body: { username, password } });
       let { data, error } = await send();
@@ -64,6 +65,7 @@ export function LoginForm({ notice, onSuccess }: Props) {
         ({ data, error } = await send());
       }
       if (data) {
+        succeeded = true; // stay disabled: the next screen takes over (review L8)
         onSuccess(data.must_change_password);
         return;
       }
@@ -71,8 +73,10 @@ export function LoginForm({ notice, onSuccess }: Props) {
     } catch {
       setFormError(MESSAGES.unreachable);
     } finally {
-      setSubmitting(false);
-      setAttempt((n) => n + 1);
+      if (!succeeded) {
+        setSubmitting(false);
+        setAttempt((n) => n + 1);
+      }
     }
   }
 
