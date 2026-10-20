@@ -45,6 +45,9 @@
     bunu kendisi uygular.
 - **Yönetim paneli:** `/admin/`, yalnız İK (aktif hesap + İK yetkisi + tamamlanmış parola
   değişimi) içindir (`config/admin.py`, `HRAdminSite`).
+  - Kabul edilen risk (review L3): Son İK kontrolü kayıtla aynı kilit altında yapılmıyor. İki
+    İK aynı anda birbirinin yetkisini kaldırırsa aktif İK sayısı 0'a düşebilir. Olasılık çok
+    düşük ve `manage.py create_first_hr` (aktif İK yoksa çalışır) ile kurtarılır.
 - **Yetkilendirme — varsayılan reddet:** DRF `DEFAULT_PERMISSION_CLASSES` = kimliği doğrulanmış +
   açık izin; her uç kendi rol/nesne kontrolünü bildirir. Yetkisiz uç bir mimari testle yakalanır.
 - **Nesne düzeyinde yetki (yalnızca sunucuda):**
