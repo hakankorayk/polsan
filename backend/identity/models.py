@@ -77,6 +77,7 @@ class LoginThrottle(models.Model):
     username = models.CharField(max_length=MAX_LENGTH, unique=True)
     failures = models.JSONField(default=list)
     locked_until = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(default=timezone.now, db_index=True)
 
     def __str__(self) -> str:
         return self.username

@@ -35,6 +35,10 @@ değiştirmek ise Django'da çok zahmetli: migration geçmişi ve yabancı anaht
     hazır özellikler yok; gerekirse ayrı bir spec ile eklenir.
   - Özel kullanıcı modeli, üçüncü parti paketlerin `get_user_model()` kullanmasını gerektirir;
     bu zaten Django'nun önerdiği kalıp.
+  - Var olmayan kullanıcı adları da kilit kaydı açar; bu kayıtlar hiç başarılı girişle
+    silinmez. Bu yüzden her hatalı denemede süresi dolmuş kayıtlar (pencere ve kilit dışında
+    kalanlar) silinir ve başarılı giriş kayıt açmaz (review M4). Tablo büyüklüğü son
+    ~15 dakikadaki farklı kullanıcı adı sayısıyla sınırlıdır.
 
 ## Alternatives considered
 - **Varsayılan `auth.User` + profil modeli:** Kullanıcı adı normalizasyonu ve büyük/küçük harf

@@ -15,7 +15,14 @@ from employees.api import (
     is_employee_active,
 )
 from identity.domain.roles import Role, derive_roles
-from identity.domain.throttle import ThrottleState, is_locked, register_failure, register_success
+from identity.domain.throttle import (
+    LOCK_DURATION,
+    WINDOW,
+    ThrottleState,
+    is_locked,
+    register_failure,
+    register_success,
+)
 from identity.domain.usernames import normalize_username
 from identity.models import LoginThrottle, User
 
@@ -35,10 +42,19 @@ def _state(row: LoginThrottle) -> ThrottleState:
     )
 
 
-def _store(row: LoginThrottle, state: ThrottleState) -> None:
+def _store(row: LoginThrottle, state: ThrottleState, now: datetime) -> None:
     row.failures = [t.isoformat() for t in state.failures]
     row.locked_until = state.locked_until
-    row.save(update_fields=["failures", "locked_until"])
+    row.updated_at = now
+    row.save(update_fields=["failures", "locked_until", "updated_at"])
+
+
+def _purge_stale(now: datetime) -> None:
+    """Rows nobody needs any more: no failure inside the window and no running lock. Unknown
+    usernames never succeed, so without this the table would only grow (review M4)."""
+    LoginThrottle.objects.filter(updated_at__lt=now - max(WINDOW, LOCK_DURATION)).exclude(
+        locked_until__gt=now
+    ).delete()
 
 
 def log_in(request: HttpRequest, username: str, password: str) -> User:
@@ -47,17 +63,21 @@ def log_in(request: HttpRequest, username: str, password: str) -> User:
     now = timezone.now()
     # Decide inside the transaction, raise after it: raising inside would roll the failure back.
     with transaction.atomic():
-        row, _ = LoginThrottle.objects.select_for_update().get_or_create(username=key)
-        state = _state(row)
+        row = LoginThrottle.objects.select_for_update().filter(username=key).first()
+        state = _state(row) if row else ThrottleState()
         user = None
         if not is_locked(state, now):
             user = authenticate(request, username=key, password=password)
             if isinstance(user, User):
                 state = register_success()
-                row.delete()  # the reset state is "no row"
+                if row:
+                    row.delete()  # the reset state is "no row"; a success never creates one
             else:
-                state = register_failure(state, now)
-                _store(row, state)
+                # Created only on the first failure; get_or_create survives a concurrent first.
+                row, _ = LoginThrottle.objects.select_for_update().get_or_create(username=key)
+                state = register_failure(_state(row), now)
+                _store(row, state, now)
+                _purge_stale(now)
     if is_locked(state, now):
         raise LoginLockedError
     if not isinstance(user, User):

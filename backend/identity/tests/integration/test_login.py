@@ -108,3 +108,29 @@ def test_logout_ends_session(client, make_user) -> None:
     assert logout.status_code == 204
     assert after.status_code == 403
     assert after.json()["code"] == "not_authenticated"
+
+
+def test_success_creates_no_throttle_row(client, make_user) -> None:
+    make_user("ayilmaz")
+
+    assert log_in(client, "ayilmaz").status_code == 200
+    assert not LoginThrottle.objects.exists()
+
+
+def test_stale_throttle_rows_are_purged_on_the_next_failure(client, db) -> None:
+    now = timezone.now()
+    LoginThrottle.objects.create(username="eski", updated_at=now - timedelta(minutes=16))
+    LoginThrottle.objects.create(
+        username="eski-kilitli",
+        updated_at=now - timedelta(minutes=20),
+        locked_until=now + timedelta(minutes=1),  # a running lock is kept
+    )
+    LoginThrottle.objects.create(username="taze", updated_at=now - timedelta(minutes=5))
+
+    log_in(client, "baskasi", "yanlis-parola-123")
+
+    assert set(LoginThrottle.objects.values_list("username", flat=True)) == {
+        "eski-kilitli",
+        "taze",
+        "baskasi",
+    }
