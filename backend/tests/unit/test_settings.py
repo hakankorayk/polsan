@@ -49,3 +49,25 @@ def test_env_example_has_no_real_secret() -> None:
 
     assert values["DJANGO_SECRET_KEY"] == ""
     assert values["POSTGRES_PASSWORD"].startswith("change-me")
+
+
+def test_production_hasher_is_argon2() -> None:
+    import config.settings as production  # settings_test already imported it with the test key
+
+    assert production.PASSWORD_HASHERS[0] == "django.contrib.auth.hashers.Argon2PasswordHasher"
+    min_length = next(
+        v
+        for v in production.AUTH_PASSWORD_VALIDATORS
+        if v["NAME"].endswith("MinimumLengthValidator")
+    )
+    assert min_length["OPTIONS"] == {"min_length": 12}
+
+
+def test_production_cookies_secure() -> None:
+    import config.settings as production
+
+    assert not production.DEBUG
+    assert production.SESSION_COOKIE_SECURE
+    assert production.CSRF_COOKIE_SECURE
+    assert production.SESSION_COOKIE_HTTPONLY
+    assert production.SESSION_COOKIE_SAMESITE == "Lax"

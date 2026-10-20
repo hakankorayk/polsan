@@ -3,11 +3,63 @@ info:
   title: Polsan Leave Manager API
   version: 0.1.0
 paths:
+  /api/auth/csrf/:
+    get:
+      operationId: auth_csrf
+      tags:
+      - auth
+      responses:
+        '204':
+          description: No response body
+  /api/auth/login/:
+    post:
+      operationId: auth_login
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResult'
+          description: ''
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/auth/password/:
+    post:
+      operationId: auth_password_change
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/health/:
     get:
       operationId: health_retrieve
       tags:
-      - api
+      - health
       responses:
         '200':
           content:
@@ -21,6 +73,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
           description: ''
+  /api/me/:
+    get:
+      operationId: me_retrieve
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
 components:
   schemas:
     Health:
@@ -30,6 +96,68 @@ components:
           $ref: '#/components/schemas/StatusEnum'
       required:
       - status
+    Login:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 150
+        password:
+          type: string
+          maxLength: 4096
+      required:
+      - password
+      - username
+    LoginResult:
+      type: object
+      properties:
+        must_change_password:
+          type: boolean
+      required:
+      - must_change_password
+    PasswordChange:
+      type: object
+      properties:
+        new_password:
+          type: string
+          maxLength: 4096
+        new_password_confirm:
+          type: string
+          maxLength: 4096
+      required:
+      - new_password
+      - new_password_confirm
+    Profile:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/RolesEnum'
+        team:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
+          nullable: true
+      required:
+      - first_name
+      - last_name
+      - roles
+      - team
+    RolesEnum:
+      enum:
+      - employee
+      - manager
+      - hr
+      type: string
+      description: |-
+        * `employee` - employee
+        * `manager` - manager
+        * `hr` - hr
     StatusEnum:
       enum:
       - ok
@@ -38,3 +166,18 @@ components:
       description: |-
         * `ok` - ok
         * `unavailable` - unavailable
+    TeamMember:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+      required:
+      - first_name
+      - last_name
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

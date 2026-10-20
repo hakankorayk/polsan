@@ -3,6 +3,7 @@
 
 import os
 from pathlib import Path
+from typing import Any
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -77,7 +78,7 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
 ]
-AUTH_PASSWORD_VALIDATORS = [
+AUTH_PASSWORD_VALIDATORS: list[dict[str, Any]] = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
@@ -102,15 +103,23 @@ SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+# Sliding 30-minute idle timeout, no "remember me" (spec 0002, AC-13)
+SESSION_COOKIE_AGE = 30 * 60
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 REST_FRAMEWORK = {
     # Default deny (docs/security.md, AuthN / AuthZ): every endpoint needs an authenticated user
     # unless it declares its own permission_classes explicitly.
     "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.SessionAuthentication"],
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+        "identity.permissions.PasswordChangeCompleted",
+    ],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "config.exceptions.problem_exception_handler",
 }
 
 SPECTACULAR_SETTINGS = {
