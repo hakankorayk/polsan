@@ -4,7 +4,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.authentication import BaseAuthentication, CSRFCheck, SessionAuthentication
+from rest_framework.authentication import BaseAuthentication, CSRFCheck
 from rest_framework.exceptions import APIException, PermissionDenied
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.request import Request
@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from identity import services
+from identity.authentication import CsrfAwareSessionAuthentication, CsrfFailedAPIError
 from identity.models import User
 from identity.permissions import PasswordChangeCompleted
 from identity.serializers import (
@@ -32,12 +33,6 @@ class LoginLockedAPIError(APIException):
     status_code = status.HTTP_429_TOO_MANY_REQUESTS
     default_code = "login_locked"
     default_detail = "Çok fazla hatalı deneme. Lütfen 15 dakika sonra tekrar deneyin."
-
-
-class CsrfFailedAPIError(APIException):
-    status_code = status.HTTP_403_FORBIDDEN
-    default_code = "csrf_failed"
-    default_detail = "Güvenlik doğrulaması başarısız. Lütfen sayfayı yenileyin."
 
 
 class PasswordChangeNotRequiredAPIError(APIException):
@@ -99,7 +94,7 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
-    authentication_classes: list[type[BaseAuthentication]] = [SessionAuthentication]
+    authentication_classes: list[type[BaseAuthentication]] = [CsrfAwareSessionAuthentication]
     permission_classes: list[type[BasePermission]] = [IsAuthenticated]
 
     @extend_schema(operation_id="auth_logout", request=None, responses={204: None})
@@ -109,7 +104,7 @@ class LogoutView(APIView):
 
 
 class PasswordChangeView(APIView):
-    authentication_classes: list[type[BaseAuthentication]] = [SessionAuthentication]
+    authentication_classes: list[type[BaseAuthentication]] = [CsrfAwareSessionAuthentication]
     permission_classes: list[type[BasePermission]] = [IsAuthenticated]
 
     @extend_schema(
@@ -126,7 +121,7 @@ class PasswordChangeView(APIView):
 
 
 class MeView(APIView):
-    authentication_classes: list[type[BaseAuthentication]] = [SessionAuthentication]
+    authentication_classes: list[type[BaseAuthentication]] = [CsrfAwareSessionAuthentication]
     permission_classes: list[type[BasePermission]] = [IsAuthenticated, PasswordChangeCompleted]
 
     @extend_schema(operation_id="me_retrieve", responses={200: ProfileSerializer})

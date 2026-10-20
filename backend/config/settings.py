@@ -127,7 +127,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 REST_FRAMEWORK = {
     # Default deny (docs/security.md, AuthN / AuthZ): every endpoint needs an authenticated user
     # unless it declares its own permission_classes explicitly.
-    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.SessionAuthentication"],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["identity.authentication.CsrfAwareSessionAuthentication"],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
         "identity.permissions.PasswordChangeCompleted",

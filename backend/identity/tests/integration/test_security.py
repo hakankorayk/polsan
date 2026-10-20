@@ -51,6 +51,10 @@ def test_login_and_password_require_csrf(make_user) -> None:
     assert without_token.json()["code"] == "csrf_failed"
     assert with_token.status_code == 200
     assert change_without_token.status_code == 403
+    assert change_without_token.json()["code"] == "csrf_failed"
+    assert change_without_token.json()["detail"] == (
+        "Güvenlik doğrulaması başarısız. Lütfen sayfayı yenileyin."
+    )
 
 
 def test_session_cookie_flags(client, make_user) -> None:
