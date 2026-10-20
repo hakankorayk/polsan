@@ -1,8 +1,9 @@
 import { type FormEvent, useEffect, useRef, useState } from "react";
 
-import { api, problemFieldErrors } from "./api/client";
+import { api, problemCode, problemFieldErrors } from "./api/client";
 import { FormField } from "./FormField";
 import { MESSAGES } from "./messages";
+import { ensureCsrfCookie } from "./session";
 
 type Props = {
   onDone: () => void;
@@ -44,22 +45,29 @@ export function PasswordChangeForm({ onDone, onSessionLost }: Props) {
     }
     setSubmitting(true);
     try {
-      const { response, error } = await api.POST("/api/auth/password/", {
-        body: { new_password: newPassword, new_password_confirm: confirm },
-      });
-      if (response.ok) {
-        onDone();
-        return;
+      const send = () =>
+        api.POST("/api/auth/password/", {
+          body: { new_password: newPassword, new_password_confirm: confirm },
+        });
+      let { response, error } = await send();
+      if (!response.ok && problemCode(error) === "csrf_failed") {
+        await ensureCsrfCookie();
+        ({ response, error } = await send());
       }
-      if (response.status === 403) {
+      const code = problemCode(error);
+      if (response.ok || code === "password_change_not_required") {
+        onDone(); // already changed (e.g. in another tab): nothing left to do here
+      } else if (code === "not_authenticated") {
         onSessionLost();
-        return;
+      } else if (code === "validation_error") {
+        const fields = problemFieldErrors(error);
+        setErrors({
+          new_password: fields.new_password?.join(" "),
+          new_password_confirm: fields.new_password_confirm?.join(" "),
+        });
+      } else {
+        setFormError(MESSAGES.unreachable); // 5xx, proxy errors, unexpected answers (M2)
       }
-      const fields = problemFieldErrors(error);
-      setErrors({
-        new_password: fields.new_password?.join(" "),
-        new_password_confirm: fields.new_password_confirm?.join(" "),
-      });
     } catch {
       setFormError(MESSAGES.unreachable);
     } finally {

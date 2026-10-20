@@ -72,4 +72,48 @@ describe("PasswordChangeForm", () => {
       },
     });
   });
+
+  it("server error shows the unreachable message (M2)", async () => {
+    post.mockResolvedValue({ response: new Response(null, { status: 500 }) } as never);
+    const onSessionLost = vi.fn();
+    render(<PasswordChangeForm onDone={vi.fn()} onSessionLost={onSessionLost} />);
+
+    await submit("Yepyeni-Parola-2027?");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.",
+    );
+    expect(onSessionLost).not.toHaveBeenCalled();
+  });
+
+  it("only not_authenticated means the session is lost (M2)", async () => {
+    post.mockResolvedValue({
+      error: { code: "not_authenticated" },
+      response: new Response(null, { status: 403 }),
+    } as never);
+    const onSessionLost = vi.fn();
+    render(<PasswordChangeForm onDone={vi.fn()} onSessionLost={onSessionLost} />);
+
+    await submit("Yepyeni-Parola-2027?");
+
+    await waitFor(() => expect(onSessionLost).toHaveBeenCalledOnce());
+  });
+
+  it("a CSRF failure is retried once, not treated as a lost session (M2)", async () => {
+    vi.mocked(api.GET).mockResolvedValue({ response: new Response(null) } as never);
+    post
+      .mockResolvedValueOnce({
+        error: { code: "csrf_failed" },
+        response: new Response(null, { status: 403 }),
+      } as never)
+      .mockResolvedValueOnce({ response: new Response(null, { status: 204 }) } as never);
+    const onDone = vi.fn();
+    const onSessionLost = vi.fn();
+    render(<PasswordChangeForm onDone={onDone} onSessionLost={onSessionLost} />);
+
+    await submit("Yepyeni-Parola-2027?");
+
+    await waitFor(() => expect(onDone).toHaveBeenCalledOnce());
+    expect(onSessionLost).not.toHaveBeenCalled();
+  });
 });

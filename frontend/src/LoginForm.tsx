@@ -3,6 +3,7 @@ import { type FormEvent, useEffect, useRef, useState } from "react";
 import { api, problemCode } from "./api/client";
 import { FormField } from "./FormField";
 import { MESSAGES } from "./messages";
+import { ensureCsrfCookie } from "./session";
 
 export type LoginNotice = "sessionExpired" | "loggedOut";
 
@@ -12,6 +13,15 @@ type Props = {
 };
 
 type FieldErrors = { username?: string; password?: string };
+
+/** Message by machine code; anything unexpected (5xx, proxy errors) means "unreachable" (M2). */
+function loginErrorMessage(code: string | undefined): string {
+  if (code === "login_locked") return MESSAGES.locked;
+  if (code === "invalid_credentials" || code === "validation_error") {
+    return MESSAGES.invalidCredentials;
+  }
+  return MESSAGES.unreachable;
+}
 
 export function LoginForm({ notice, onSuccess }: Props) {
   const [username, setUsername] = useState("");
@@ -46,15 +56,18 @@ export function LoginForm({ notice, onSuccess }: Props) {
     }
     setSubmitting(true);
     try {
-      const { data, error } = await api.POST("/api/auth/login/", {
-        body: { username, password },
-      });
+      const send = () => api.POST("/api/auth/login/", { body: { username, password } });
+      let { data, error } = await send();
+      if (!data && problemCode(error) === "csrf_failed") {
+        // The CSRF cookie can be missing if the server was down when the page loaded.
+        await ensureCsrfCookie();
+        ({ data, error } = await send());
+      }
       if (data) {
         onSuccess(data.must_change_password);
         return;
       }
-      const code = problemCode(error);
-      setFormError(code === "login_locked" ? MESSAGES.locked : MESSAGES.invalidCredentials);
+      setFormError(loginErrorMessage(problemCode(error)));
     } catch {
       setFormError(MESSAGES.unreachable);
     } finally {

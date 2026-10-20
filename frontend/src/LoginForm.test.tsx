@@ -94,4 +94,37 @@ describe("LoginForm", () => {
       "Oturumunuzun süresi doldu. Lütfen yeniden giriş yapın.",
     );
   });
+
+  it("server error (5xx) shows the unreachable message, not a credentials error (M2)", async () => {
+    answer(502, undefined);
+    render(<LoginForm onSuccess={vi.fn()} />);
+
+    await fillAndSubmit();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.",
+    );
+  });
+
+  it("refreshes the CSRF cookie and retries once on csrf_failed (M2)", async () => {
+    const get = vi.mocked(api.GET);
+    get.mockResolvedValue({ response: new Response(null, { status: 204 }) } as never);
+    post
+      .mockResolvedValueOnce({
+        error: { code: "csrf_failed" },
+        response: new Response(null, { status: 403 }),
+      } as never)
+      .mockResolvedValueOnce({
+        data: { must_change_password: false },
+        response: new Response(null),
+      } as never);
+    const onSuccess = vi.fn();
+    render(<LoginForm onSuccess={onSuccess} />);
+
+    await fillAndSubmit("ayilmaz", "Guclu-Parola-2026!");
+
+    await waitFor(() => expect(onSuccess).toHaveBeenCalledWith(false));
+    expect(get).toHaveBeenCalledWith("/api/auth/csrf/");
+    expect(post).toHaveBeenCalledTimes(2);
+  });
 });
