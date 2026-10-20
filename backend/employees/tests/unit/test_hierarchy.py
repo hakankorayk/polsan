@@ -52,3 +52,22 @@ def test_turkish_sort_key() -> None:
         "Uğur",
         "Yılmaz",
     ]
+
+
+def test_circumflex_letters_sort_with_their_base_letter() -> None:
+    names = ["Zorlu", "Âdem", "Akın", "Kâmil", "Kaya", "Kemal"]
+
+    assert sorted(names, key=turkish_sort_key) == [
+        "Âdem",
+        "Akın",
+        "Kâmil",
+        "Kaya",
+        "Kemal",
+        "Zorlu",
+    ]
+
+
+def test_space_sorts_before_letters() -> None:
+    names = ["Akınal", "Akın Yılmaz", "Akın"]
+
+    assert sorted(names, key=turkish_sort_key) == ["Akın", "Akın Yılmaz", "Akınal"]

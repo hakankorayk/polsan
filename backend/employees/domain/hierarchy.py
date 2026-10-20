@@ -36,7 +36,15 @@ def validate_manager[Id: Hashable](
         current = manager_of(current)
 
 
+_CIRCUMFLEX = str.maketrans({"â": "a", "î": "i", "û": "u"})
+
+
 def turkish_sort_key(text: str) -> tuple[int, ...]:
-    """Sort key following the Turkish alphabet (ç after c, ı before i, ş after s ...)."""
-    lowered = text.replace("I", "ı").replace("İ", "i").lower()
-    return tuple(_POSITION.get(char, len(TURKISH_ALPHABET) + ord(char)) for char in lowered)
+    """Sort key following the Turkish alphabet (ç after c, ı before i, ş after s ...).
+    â/î/û sort as a/i/u (Kâmil next to Kamil); a space sorts before every letter, so
+    multi-word surnames stay next to their first word."""
+    lowered = text.replace("I", "ı").replace("İ", "i").lower().translate(_CIRCUMFLEX)
+    return tuple(
+        -1 if char == " " else _POSITION.get(char, len(TURKISH_ALPHABET) + ord(char))
+        for char in lowered
+    )
