@@ -1,29 +1,48 @@
-"""AC-7: every endpoint declares its permissions explicitly (default deny otherwise)."""
+"""AC-7 (spec 0001): every endpoint declares its permissions explicitly (default deny otherwise).
+Spec 0002 adds the admin site: its routes are not DRF views, so they must all belong to the
+HR-only HRAdminSite, which enforces access itself (spec 0002, AC-5)."""
 
+from django.contrib.admin import AdminSite
 from django.urls import URLPattern, URLResolver, get_resolver
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 
+from config.admin import HRAdminSite, hr_admin_site
 from tests.architecture.checks import undeclared_permission_violations
 
 
 def _routes(
     patterns: list[URLPattern | URLResolver], prefix: str = ""
-) -> list[tuple[str, type | None]]:
+) -> tuple[list[tuple[str, type | None]], list[str]]:
+    """(API routes with their DRF view class, routes owned by the HR admin site)."""
     routes: list[tuple[str, type | None]] = []
+    admin_routes: list[str] = []
     for pattern in patterns:
-        if isinstance(pattern, URLResolver):
-            routes += _routes(pattern.url_patterns, prefix + str(pattern.pattern))
+        route = prefix + str(pattern.pattern)
+        if isinstance(pattern, URLResolver) and pattern.namespace == hr_admin_site.name:
+            admin_routes.append(route)
+        elif isinstance(pattern, URLResolver):
+            nested, nested_admin = _routes(pattern.url_patterns, route)
+            routes += nested
+            admin_routes += nested_admin
         else:
-            routes.append((prefix + str(pattern.pattern), getattr(pattern.callback, "cls", None)))
-    return routes
+            routes.append((route, getattr(pattern.callback, "cls", None)))
+    return routes, admin_routes
 
 
 def test_every_endpoint_declares_permissions() -> None:
-    routes = _routes(get_resolver().url_patterns)
+    routes, _ = _routes(get_resolver().url_patterns)
 
     assert routes, "no routes found — the check would pass vacuously"
     assert undeclared_permission_violations(routes) == []
+
+
+def test_admin_routes_belong_to_the_hr_only_site() -> None:
+    _, admin_routes = _routes(get_resolver().url_patterns)
+
+    assert admin_routes == ["admin/"]
+    assert isinstance(hr_admin_site, HRAdminSite)
+    assert HRAdminSite.has_permission is not AdminSite.has_permission  # HR-only check in place
 
 
 class _Declared(APIView):

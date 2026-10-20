@@ -19,3 +19,7 @@ def create_employee(
         manager=manager,
         is_active=active,
     )
+
+
+def find_employee(first_name: str) -> Employee:
+    return Employee.objects.get(first_name=first_name)

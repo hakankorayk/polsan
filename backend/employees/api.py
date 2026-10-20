@@ -3,6 +3,7 @@
 Other modules may import only this module (docs/architecture.md, Forbidden dependencies 1).
 """
 
+import datetime
 import uuid
 from dataclasses import dataclass
 
@@ -12,6 +13,7 @@ from employees.models import Employee
 __all__ = [
     "EmployeeInfo",
     "active_direct_reports",
+    "create_employee",
     "get_employee",
     "has_active_direct_reports",
     "is_employee_active",
@@ -33,6 +35,14 @@ def _info(employee: Employee) -> EmployeeInfo:
         last_name=employee.last_name,
         is_active=employee.is_active,
     )
+
+
+def create_employee(first_name: str, last_name: str, hire_date: datetime.date) -> int:
+    """Create an employee with no manager; returns its id (used by `create_first_hr`)."""
+    employee = Employee(first_name=first_name, last_name=last_name, hire_date=hire_date)
+    employee.full_clean()
+    employee.save()
+    return employee.pk
 
 
 def get_employee(employee_id: int) -> EmployeeInfo | None:
