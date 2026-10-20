@@ -23,7 +23,7 @@ from identity.domain.throttle import (
     register_failure,
     register_success,
 )
-from identity.domain.usernames import normalize_username
+from identity.domain.usernames import MAX_LENGTH, normalize_username
 from identity.models import LoginThrottle, User
 
 
@@ -60,6 +60,8 @@ def _purge_stale(now: datetime) -> None:
 def log_in(request: HttpRequest, username: str, password: str) -> User:
     """Throttled login. Wrong password, unknown user and inactive account are indistinguishable."""
     key = normalize_username(username)
+    if len(key) > MAX_LENGTH:  # "İ".lower() is two characters: no such account can exist (L1)
+        raise InvalidCredentialsError
     now = timezone.now()
     # Decide inside the transaction, raise after it: raising inside would roll the failure back.
     with transaction.atomic():

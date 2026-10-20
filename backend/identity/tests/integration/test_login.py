@@ -134,3 +134,11 @@ def test_stale_throttle_rows_are_purged_on_the_next_failure(client, db) -> None:
         "taze",
         "baskasi",
     }
+
+
+def test_overlong_username_after_normalization_is_invalid_not_500(client, db) -> None:
+    response = log_in(client, "İ" * 76)  # 76 characters, 152 after lower()
+
+    assert response.status_code == 400
+    assert response.json()["code"] == "invalid_credentials"
+    assert not LoginThrottle.objects.exists()
