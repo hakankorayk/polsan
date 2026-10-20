@@ -15,7 +15,7 @@ from employees.api import (
     is_employee_active,
 )
 from identity.domain.roles import Role, derive_roles
-from identity.domain.throttle import ThrottleState, is_locked, register_failure
+from identity.domain.throttle import ThrottleState, is_locked, register_failure, register_success
 from identity.domain.usernames import normalize_username
 from identity.models import LoginThrottle, User
 
@@ -53,7 +53,8 @@ def log_in(request: HttpRequest, username: str, password: str) -> User:
         if not is_locked(state, now):
             user = authenticate(request, username=key, password=password)
             if isinstance(user, User):
-                row.delete()  # a success resets the counter
+                state = register_success()
+                row.delete()  # the reset state is "no row"
             else:
                 state = register_failure(state, now)
                 _store(row, state)

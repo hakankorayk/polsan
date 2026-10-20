@@ -68,6 +68,20 @@ def test_lock_expires_after_15_minutes(client, make_user) -> None:
     assert log_in(client, "ayilmaz", PASSWORD).status_code == 200
 
 
+def test_success_resets_counter(client, make_user) -> None:
+    make_user("ayilmaz")
+    for _ in range(4):
+        assert log_in(client, "ayilmaz", "yanlis-parola-123").status_code == 400
+    assert log_in(client, "ayilmaz").status_code == 200
+    client.post("/api/auth/logout/")
+
+    after_reset = [log_in(client, "ayilmaz", "yanlis-parola-123").status_code for _ in range(4)]
+    fifth = log_in(client, "ayilmaz", "yanlis-parola-123")
+
+    assert after_reset == [400, 400, 400, 400]  # without the reset the first of these would lock
+    assert fifth.status_code == 429
+
+
 def test_unknown_username_gets_lock_message(client, db) -> None:
     for _ in range(4):
         log_in(client, "boyle-biri-yok", "yanlis-parola-123")
