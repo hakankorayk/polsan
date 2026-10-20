@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-10-20
+- Revised: 2026-10-20 — sonuçlar review bulgularına göre tamamlandı (M4, L10); karar değişmedi
 
 ## Context
 Spec 0002 giriş ve rolleri getiriyor. Gereksinimler:
@@ -39,6 +40,11 @@ değiştirmek ise Django'da çok zahmetli: migration geçmişi ve yabancı anaht
     silinmez. Bu yüzden her hatalı denemede süresi dolmuş kayıtlar (pencere ve kilit dışında
     kalanlar) silinir ve başarılı giriş kayıt açmaz (review M4). Tablo büyüklüğü son
     ~15 dakikadaki farklı kullanıcı adı sayısıyla sınırlıdır.
+  - Kilit yalnız kullanıcı adına göre işlediği için, kullanıcı adını bilen herkes bir hesabı
+    (tek İK hesabı dahil) her 15 dakikada 5 hatalı denemeyle kilitleyebilir (hedefli
+    hizmet engelleme, review L10). Bu bilinçli bir tercih: IP'ye göre sayım, var olmayan
+    kullanıcı adlarının aynı işlenmesi kuralıyla birlikte kullanıcı adı keşfini önlemiyor ve
+    paylaşılan NAT arkasındaki ofisi topluca kilitleyebilirdi.
 
 ## Alternatives considered
 - **Varsayılan `auth.User` + profil modeli:** Kullanıcı adı normalizasyonu ve büyük/küçük harf
@@ -51,4 +57,5 @@ değiştirmek ise Django'da çok zahmetli: migration geçmişi ve yabancı anaht
 
 ## Revisit triggers
 - IP bazlı sınırlama, dağıtık (çok sunuculu) kilit veya kilit bildirimi gerekirse.
+- Hedefli kilitleme gerçekte gözlenirse (ör. İK hesabının tekrar tekrar kilitlenmesi).
 - AD/Entra ID entegrasyonu kimlik modelinde değişiklik isterse.
