@@ -1,5 +1,7 @@
 """Spec 0002 — AC-1, AC-3, AC-5, AC-12, AC-25, AC-26 through the HR admin site."""
 
+import re
+
 import pytest
 from django.test import Client
 from rest_framework.test import APIClient
@@ -209,3 +211,44 @@ def test_account_cannot_be_relinked_to_another_employee(make_user, make_employee
     assert hr.employee_id != former.pk
     assert active_hr_count() == 1
     assert client.get("/admin/").status_code == 200
+
+
+def _admin_paths() -> list[str]:
+    """Every route of the HR admin site, with sample values for its parameters."""
+    from django.urls import URLPattern, URLResolver
+    from django.urls.resolvers import RegexPattern
+
+    from config.admin import hr_admin_site
+
+    def walk(patterns: list, prefix: str) -> list[str]:
+        paths: list[str] = []
+        for pattern in patterns:
+            if isinstance(pattern.pattern, RegexPattern):
+                # app_index ^(?P<app_label>employees|identity)/$ -> "employees/";
+                # catch-all ^(?P<url>.*)$ -> "x"
+                route = re.sub(r"\(\?P<\w+>([\w-]+)(\|[^)]*)?\)", r"\1", str(pattern.pattern))
+                route = re.sub(r"\(\?P<\w+>[^)]*\)", "x", route).strip("^$")
+            else:
+                route = re.sub(r"<(?:\w+:)?\w+>", "1", str(pattern.pattern))
+            if isinstance(pattern, URLResolver):
+                paths += walk(pattern.url_patterns, prefix + route)
+            elif isinstance(pattern, URLPattern):
+                paths.append(prefix + route)
+        return paths
+
+    return walk(hr_admin_site.get_urls(), "/admin/")
+
+
+def test_every_admin_route_denied_for_non_hr(make_user) -> None:
+    employee_user = make_user("calisan")
+    anonymous = Client()
+    logged_in = Client()
+    logged_in.force_login(employee_user)
+    paths = _admin_paths()
+
+    assert len(paths) > 10, paths  # the walk found the model admin routes too
+    for client in (anonymous, logged_in):
+        for path in paths:
+            response = client.get(path)
+            assert response.status_code == 302, path
+            assert client.get(path, follow=True).redirect_chain[-1] == ("/", 302), path
