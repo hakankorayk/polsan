@@ -229,3 +229,25 @@ def test_admin_created_employee_accrues_from_creation_day(
 
     assert on_creation == Decimal(0)
     assert next_year == Decimal(26)  # the 15th anniversary
+
+
+def test_admin_missed_anniversary_while_inactive_is_not_backfilled(
+    hr_client: Client, employee: Employee, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """AC-14 through the admin (review L5): the 2026-03-10 anniversary passes while the employee
+    is inactive; reactivating on 2026-06-01 does not add it, the next one accrues normally."""
+    set_start_date(D(2020, 1, 1))
+    url = f"/admin/employees/employee/{employee.pk}/change/"
+
+    monkeypatch.setattr(clock, "today", lambda: D(2026, 1, 1))
+    hr_client.post(url, _employee_form(employee, is_active=""))
+    monkeypatch.setattr(clock, "today", lambda: D(2026, 6, 1))
+    hr_client.post(url, _employee_form(employee))
+
+    after_reactivation = balance_of(employee.pk, D(2026, 10, 21))
+    next_anniversary = balance_of(employee.pk, D(2027, 3, 10))
+    years = LedgerEntry.objects.filter(employee=employee).values_list("seniority_year", flat=True)
+
+    assert after_reactivation == Decimal(14 * 5)  # years 1-5; year 6 (2026-03-10) missed
+    assert next_anniversary == Decimal(14 * 5 + 20)
+    assert sorted(year for year in years if year is not None) == [1, 2, 3, 4, 5, 7]

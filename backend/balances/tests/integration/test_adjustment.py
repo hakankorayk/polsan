@@ -1,9 +1,11 @@
 """Spec 0003 — HR adjustments: AC-16, AC-17 (service side), AC-18, AC-20 (BR-12)."""
 
+import datetime
 import uuid
 from decimal import Decimal
 
 import pytest
+from django.utils import timezone
 
 from audit.api import records_for
 from balances.api import AdjustmentError, add_adjustment, balance_of, summary_of
@@ -59,6 +61,9 @@ def test_adjustment_writes_audit_record(employee: Employee) -> None:
     [audit] = records_for(entry_id)
 
     assert (audit.actor_id, audit.action) == (HR, "balance.adjustment")
+    # "when" (AC-20): stamped by the server at write time, in UTC (docs/security.md, Audit)
+    assert audit.occurred_at.utcoffset() == datetime.timedelta(0)
+    assert abs(timezone.now() - audit.occurred_at) < datetime.timedelta(minutes=1)
     assert audit.data == {
         "employee": str(employee.public_id),
         "amount": "5",
