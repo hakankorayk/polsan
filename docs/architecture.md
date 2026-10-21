@@ -16,7 +16,8 @@ Repo düzeni (monorepo):
 - `backend/` — Django projesi; her modül bir Django app (`backend/<modül>/`).
   `backend/config/` composition root'tur: settings, URL'ler, herkese açık durum ucu
   (`config/health.py`), hata biçimi (`config/exceptions.py`) ve yalnız İK'ya açık yönetim
-  paneli (`config/admin.py`). Modülleri bir araya getirir; iki modülü birden gerektiren kurallar
+  paneli (`config/admin.py`; çalışan kaydını değiştirmeden önce ve sonra `balances.api`'yi
+  çağırır, ADR 0004). Modülleri bir araya getirir; iki modülü birden gerektiren kurallar
   (ör. "son aktif İK pasif yapılamaz") yalnızca modüllerin `api.py`'si çağrılarak burada
   birleştirilir.
 - `backend/tests/` — modüllere ait olmayan testler (mimari, ayarlar) ve ortak test fabrikaları
@@ -52,7 +53,11 @@ Her backend modülünün iç düzeni:
   Her modül `audit`'i çağırabilir; `audit` hiçbir modülü çağırmaz.
 - Bir iş akışı birden çok modülü değiştiriyorsa (örn. onay → bakiyeden düşüm) akışın sahibi modül
   (`leaves`) tek bir veritabanı transaction'ı içinde açık çağrılarla yürütür.
-- Message broker / kuyruk / arka plan işçisi v1'de yoktur.
+- Message broker / kuyruk / arka plan işçisi v1'de yoktur. Zamana bağlı hak edişler bu yüzden
+  bakiye okunurken, idempotent olarak deftere yazılır ([ADR 0004](decisions/0004-accruals-materialized-on-read.md)).
+- **Hesap → çalışan sözleşmesi:** `AUTH_USER_MODEL` (`identity.User`) her zaman bir
+  `employee_id` taşır. `identity`'yi import edemeyen modüllerin görünümleri giriş yapanın
+  çalışanını `request.user.employee_id` özniteliğinden okur (ilk kullanım `balances/views.py`).
 - Frontend ↔ backend: yalnızca REST/JSON API (`/api/...`), OpenAPI şemasından üretilen istemciyle.
 
 ## Forbidden dependencies (make them testable)

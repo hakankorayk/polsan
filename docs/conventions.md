@@ -54,6 +54,9 @@
   handler (`config/exceptions.py`) her hatayı **RFC 9457 `application/problem+json`** yanıtına
   çevirir: `type`, `title`, `status`, `code` (makine kodu), `detail` (Türkçe kullanıcı mesajı).
   Doğrulama hataları `code = validation_error` ve alan bazında `errors` ile döner.
+- Yönetim paneli form hataları da aynı sabit kodları taşır (spec 0003): `birth_date_in_future`,
+  `birth_date_not_before_hire`, `amount_zero`, `amount_not_half_multiple`, `amount_too_large`,
+  `reason_required`, `accrual_start_locked`.
 - Bugünkü kodlar: `invalid_credentials`, `login_locked`, `csrf_failed`, `not_authenticated`,
   `password_change_required`, `password_change_not_required`, `validation_error`, `server_error`.
 - Stack trace, SQL, dosya yolu, iç kimlik veya başka kullanıcının verisi **asla** yanıta sızmaz.
