@@ -5,6 +5,9 @@
 
 The temporary password is read from FIRST_HR_PASSWORD or asked interactively; it is never a
 command-line argument (it would land in shell history). The account must change it at first login.
+
+Lives in the composition root (spec 0003, review N2): it wires employees, identity and balances —
+the new record's accrual floor is today, like every employee HR adds in the admin (Req 4).
 """
 
 import datetime
@@ -17,6 +20,7 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 from django.db import transaction
 
+from balances import api as balances
 from employees.api import create_employee
 from identity.api import active_hr_count
 from identity.models import User
@@ -60,6 +64,7 @@ class Command(BaseCommand):
                 )
             except ValidationError as error:
                 raise CommandError(" ".join(error.messages)) from error
+            balances.employee_created(employee_id, balances.today())
         self.stdout.write(self.style.SUCCESS(f"İK hesabı oluşturuldu: {user.username}"))
 
     def _ask_password(self) -> str:

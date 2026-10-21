@@ -19,7 +19,10 @@ Repo düzeni (monorepo):
   paneli (`config/admin.py`; çalışan kaydını değiştirmeden önce ve sonra `balances.api`'yi
   çağırır, ADR 0004). Modülleri bir araya getirir; iki modülü birden gerektiren kurallar
   (ör. "son aktif İK pasif yapılamaz") yalnızca modüllerin `api.py`'si çağrılarak burada
-  birleştirilir.
+  birleştirilir. Birden çok modülü bağlayan yönetim komutları da buradadır
+  (`config/management/commands/create_first_hr.py`); bu yüzden `config` `INSTALLED_APPS`'te
+  kuruludur. `config` bir modül değildir ve kural 1'den muaftır: admin kaydı modellerin
+  kendisini gerektirdiği için `config/admin.py` modellerini import edebilir.
 - `backend/tests/` — modüllere ait olmayan testler (mimari, ayarlar) ve ortak test fabrikaları
   (`tests/factories.py`); kural 1'e tabi değildir.
 - `frontend/` — React SPA; backend'e yalnızca OpenAPI'den üretilen tipli istemciyle erişir.
