@@ -28,8 +28,10 @@ def anniversary(hire: datetime.date, year: int) -> datetime.date:
 
 
 def completed_years(start: datetime.date, on: datetime.date) -> int:
-    before_anniversary = (on.month, on.day) < (start.month, start.day)
-    return on.year - start.year - int(before_anniversary)
+    """Full years from ``start`` to ``on``, for seniority and age alike: someone born or hired on
+    29 February completes a year on 28 February in common years (spec 0003, Req 2; review L1)."""
+    years = on.year - start.year
+    return years - int(on < anniversary(start, years))
 
 
 def entitlement(seniority_year: int, age: int) -> Decimal:

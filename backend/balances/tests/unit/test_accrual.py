@@ -8,6 +8,7 @@ import pytest
 from balances.domain.accrual import (
     Accrual,
     anniversary,
+    completed_years,
     due_accruals,
     entitlement,
     next_accrual,
@@ -173,3 +174,17 @@ def test_next_accrual_skips_years_already_in_ledger() -> None:
     assert _days(due_accruals(moved, BORN_30, START, today, D(2029, 3, 10), accrued)) == [
         (7, Decimal(20))
     ]
+
+
+def test_br2_feb29_birthday_counts_on_feb28() -> None:
+    """AC-33 (review L1): born 1976-02-29, the 2026-02-28 anniversary is the 50th birthday."""
+    hire = D(2025, 2, 28)
+    leap_born = D(1976, 2, 29)
+
+    [accrual] = due_accruals(hire, leap_born, START, None, D(2026, 2, 28))
+
+    assert accrual.days == Decimal(20)
+    assert completed_years(leap_born, D(2026, 2, 27)) == 49
+    assert completed_years(leap_born, D(2026, 2, 28)) == 50
+    assert completed_years(leap_born, D(2028, 2, 28)) == 51  # leap year: birthday is 29 Feb
+    assert completed_years(leap_born, D(2028, 2, 29)) == 52
