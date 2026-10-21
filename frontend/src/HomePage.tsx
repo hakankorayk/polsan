@@ -1,3 +1,4 @@
+import { BalanceSection } from "./BalanceSection";
 import { ROLE_LABELS } from "./messages";
 
 export type Profile = {
@@ -13,7 +14,8 @@ type Props = {
   onLogout: () => void;
 };
 
-/** Spec 0002, AC-15 and AC-16: own name and roles; managers also see their direct team. */
+/** Spec 0002, AC-15 and AC-16: own name and roles; managers also see their direct team.
+ * Spec 0003, AC-22: the own leave balance. */
 export function HomePage({ profile, loggingOut, onLogout }: Props) {
   const roles = profile.roles.map((role) => ROLE_LABELS[role] ?? role).join(", ");
   return (
@@ -22,6 +24,7 @@ export function HomePage({ profile, loggingOut, onLogout }: Props) {
         Hoş geldiniz, {profile.first_name} {profile.last_name}
       </h1>
       <p>Rolleriniz: {roles}</p>
+      <BalanceSection />
       {profile.team !== null && (
         <section aria-labelledby="team-heading">
           <h2 id="team-heading">Ekibim</h2>

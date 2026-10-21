@@ -21,7 +21,10 @@
 | İzin Bakiyesi — `Balance` | Defterdeki hareketlerin toplamı | |
 | Kullanılabilir Bakiye — `AvailableBalance` | Bakiye − beklemedeki taleplerin gün toplamı | Yeni talep bununla karşılaştırılır |
 | Devir — `CarryOver` | Kullanılmayan yıllık iznin sonraki yıla aktarılması | Yasal zorunluluk; izin yanmaz |
-| Düzeltme — `Adjustment` | İK'nın gerekçeli manuel bakiye hareketi | |
+| Düzeltme — `Adjustment` | İK'nın gerekçeli manuel bakiye hareketi | Miktar 0 değil, 0,5'in katı, mutlak değeri ≤ 100 gün; girildiği güne tarihlenir; gerekçe çalışana görünür |
+| Açılış bakiyesi — `OpeningBalance` | Kıdemli çalışanın sisteme taşınan mevcut bakiyesi | Ayrı bir tür değil: gerekçesi açılışı belirten sıradan bir **düzeltme** (spec 0003) |
+| Otomatik hak ediş başlangıç tarihi — `AccrualStartDate` | Otomatik hak edişin çalışmaya başladığı şirket geneli tarih | Öncesindeki yıldönümleri hak ediş oluşturmaz; ilk otomatik hak edişten sonra değiştirilemez |
+| Hak ediş sınırı — `AccrualFloor` | Çalışan başına "bu tarihten önceki yıldönümleri artık oluşmaz" tarihi | Pasiften aktife dönüşte ve işe giriş/doğum tarihi değişiminde yazılır ([ADR 0004](decisions/0004-accruals-materialized-on-read.md)) |
 | Onaylayıcı — `Approver` | Talebi onaylama/reddetme yetkisi olan kişi | Yönetici; yöneticisi olmayan için İK |
 | Hesap — `Account` (`identity.User`) | Bir çalışanın uygulamaya giriş kaydı; her çalışanın en fazla bir hesabı, her hesabın tam bir çalışanı vardır | Çalışan kaydı değildir; pasif yapılır, silinmez |
 | Kullanıcı adı — `username` | Girişte kullanılan, büyük/küçük harf duyarsız, yalnız ASCII harf, rakam ve `. _ -` içeren kimlik | E-posta değildir |

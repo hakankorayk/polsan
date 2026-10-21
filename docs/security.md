@@ -19,6 +19,9 @@
   başka kullanıcının verisi asla sızmaz.
 - **KVKK:** izin verisi kişisel veridir. v1'de sağlık bilgisi/rapor gibi özel nitelikli kişisel veri
   saklanmaz. Loglara kişisel veri (ad, e-posta, izin gerekçesi) değil, yalnızca UUID yazılır.
+- **Doğum tarihi** (spec 0003) kişisel veridir ve yalnız BR-2 için tutulur: yalnız İK yönetim
+  panelinde görür. Hiçbir API yanıtında ve OpenAPI şemasında yer almaz; `employees.api`
+  `EmployeeInfo`'ya eklenmez, yalnız `EmploymentFacts` (hak ediş hesabı) taşır.
 - Güvenlik başlıkları: `SECURE_*` ayarları, `X-Frame-Options: DENY`, katı Content-Security-Policy.
 
 ## AuthN / AuthZ

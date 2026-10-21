@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "leaves",
     "identity",
     "audit",
+    "config",  # composition root: management commands that wire several modules (create_first_hr)
 ]
 
 MIDDLEWARE = [

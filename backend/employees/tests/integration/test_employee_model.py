@@ -1,4 +1,5 @@
-"""Spec 0002 — AC-2 through the model form the admin uses; reports query used by AC-16."""
+"""Spec 0002 — AC-2 through the model form the admin uses; reports query used by AC-16.
+Spec 0003 — AC-1, AC-2: birth date is required and validated by the same form."""
 
 from __future__ import annotations
 
@@ -11,14 +12,21 @@ from employees.api import active_direct_reports, has_active_direct_reports
 from employees.models import Employee
 
 HIRED = datetime.date(2020, 1, 1)
+BORN = datetime.date(1990, 1, 1)
 EmployeeForm = modelform_factory(
-    Employee, fields=["first_name", "last_name", "hire_date", "manager", "is_active"]
+    Employee,
+    fields=["first_name", "last_name", "hire_date", "birth_date", "manager", "is_active"],
 )
 
 
 def _employee(first: str, last: str, manager: Employee | None = None, active: bool = True):
     return Employee.objects.create(
-        first_name=first, last_name=last, hire_date=HIRED, manager=manager, is_active=active
+        first_name=first,
+        last_name=last,
+        hire_date=HIRED,
+        birth_date=BORN,
+        manager=manager,
+        is_active=active,
     )
 
 
@@ -27,6 +35,7 @@ def _form(instance: Employee, manager: Employee | None) -> ModelForm[Employee]:
         "first_name": instance.first_name,
         "last_name": instance.last_name,
         "hire_date": HIRED.isoformat(),
+        "birth_date": BORN.isoformat(),
         "manager": manager.pk if manager else "",
         "is_active": "on",
     }
@@ -78,3 +87,40 @@ def test_active_direct_reports_sorted_direct_and_active_only() -> None:
     assert names == ["Çelik", "Demir", "Şahin", "Yılmaz"]
     assert has_active_direct_reports(boss.pk)
     assert not has_active_direct_reports(_employee("Yalnız", "Kişi").pk)
+
+
+def _new_employee_form(birth_date: str) -> ModelForm[Employee]:
+    data = {
+        "first_name": "Ali",
+        "last_name": "Aksoy",
+        "hire_date": HIRED.isoformat(),
+        "birth_date": birth_date,
+        "is_active": "on",
+    }
+    return EmployeeForm(data=data)
+
+
+@pytest.mark.django_db
+def test_birth_date_required() -> None:
+    form = _new_employee_form("")
+
+    assert not form.is_valid()
+    assert form.errors.as_data()["birth_date"][0].code == "required"
+    assert not Employee.objects.exists()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("birth_date", "code"),
+    [
+        ((datetime.date.today() + datetime.timedelta(days=2)).isoformat(), "birth_date_in_future"),
+        (HIRED.isoformat(), "birth_date_not_before_hire"),
+        ("2020-06-01", "birth_date_not_before_hire"),
+    ],
+)
+def test_invalid_birth_date_not_saved(birth_date: str, code: str) -> None:
+    form = _new_employee_form(birth_date)
+
+    assert not form.is_valid()
+    assert form.errors.as_data()["birth_date"][0].code == code
+    assert not Employee.objects.exists()

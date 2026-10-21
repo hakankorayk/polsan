@@ -24,7 +24,13 @@ def hr_client(make_user, make_employee) -> Client:
 
 
 def _employee_form(first: str, last: str, manager: str = "", active: bool = True) -> dict:
-    data = {"first_name": first, "last_name": last, "hire_date": "2021-03-15", "manager": manager}
+    data = {
+        "first_name": first,
+        "last_name": last,
+        "hire_date": "2021-03-15",
+        "birth_date": "1990-04-23",
+        "manager": manager,
+    }
     if active:
         data["is_active"] = "on"
     return data
@@ -215,10 +221,8 @@ def test_account_cannot_be_relinked_to_another_employee(make_user, make_employee
 
 def _admin_paths() -> list[str]:
     """Every route of the HR admin site, with sample values for its parameters."""
-    from django.urls import URLPattern, URLResolver
+    from django.urls import URLPattern, URLResolver, get_resolver
     from django.urls.resolvers import RegexPattern
-
-    from config.admin import hr_admin_site
 
     def walk(patterns: list, prefix: str) -> list[str]:
         paths: list[str] = []
@@ -236,7 +240,14 @@ def _admin_paths() -> list[str]:
                 paths.append(prefix + route)
         return paths
 
-    return walk(hr_admin_site.get_urls(), "/admin/")
+    # Found through the URL conf, not imported: config.admin wires other modules (e.g. balances)
+    # that identity may not depend on, even indirectly (import-linter rule 2).
+    [admin_site] = [
+        p
+        for p in get_resolver().url_patterns
+        if isinstance(p, URLResolver) and p.namespace == "hr_admin"
+    ]
+    return walk(admin_site.url_patterns, "/admin/")
 
 
 def test_every_admin_route_denied_for_non_hr(make_user) -> None:
