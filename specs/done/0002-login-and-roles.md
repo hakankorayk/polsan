@@ -1,6 +1,6 @@
 # Spec 0002 — Giriş ve roller
 
-- Status: In progress
+- Status: Shipped
 - Mode: lite
 - Plan: `specs/plans/0002-plan.md`
 
@@ -126,47 +126,47 @@ Netleştirme kararları (2026-10-20):
   - Toplu çalışan içe aktarma.
 
 ## Acceptance criteria
-- [ ] AC-1 — İK yönetim panelinden ad, soyad, işe giriş tarihi, yönetici ve aktif/pasif bilgisiyle çalışan oluşturabilir ve düzenleyebilir.
-- [ ] AC-2 — Bir çalışanı kendi yöneticisi yapmak veya yönetici zincirinde döngü oluşturmak (A → B → A, A → B → C → A) kaydedilmez ve İK'ya hata gösterilir.
-- [ ] AC-3 — İK bir çalışana kullanıcı adı ve geçici parolayla hesap açabilir; aynı kullanıcı adıyla ikinci hesap ve aynı çalışana ikinci hesap kaydedilmez.
-- [ ] AC-4 — Rol türetme: aktif her çalışan Çalışan; en az bir aktif doğrudan bağlısı olan Yönetici; bağlılarının hepsi pasif olan Yönetici değil; İK yetkisi verilen İK. Roller birlikte bulunabilir.
-- [ ] AC-5 — İK rolü olmayan giriş yapmış bir kullanıcı ve giriş yapmamış bir kullanıcı yönetim paneline erişemez.
-- [ ] AC-6 — Doğru kullanıcı adı ve kalıcı parolayla giriş başarılı olur ve kullanıcı ana sayfaya ulaşır.
-- [ ] AC-7 — Hatalı parola, var olmayan kullanıcı adı ve pasif hesap aynı yanıtı ve aynı "Kullanıcı adı veya parola hatalı." mesajını alır.
-- [ ] AC-8 — Aynı kullanıcı adıyla 5. hatalı denemeden sonra o kullanıcı adı 15 dakika kilitlenir: kilitliyken doğru parola da reddedilir ve "Çok fazla hatalı deneme…" mesajı gösterilir; 15 dakika dolunca doğru parolayla giriş yapılabilir; 4 hatalı deneme kilitlemez.
-- [ ] AC-9 — Var olmayan bir kullanıcı adı da 5 hatalı denemeden sonra aynı kilit mesajını alır.
-- [ ] AC-10 — Geçici parolayla giren kullanıcı yeni parola belirleyene kadar parola değiştirme dışındaki her sayfa ve API ucunda reddedilir veya parola değiştirme ekranına yönlenir.
-- [ ] AC-11 — Yeni parola 12 karakterden kısa, çok yaygın, yalnız rakam, geçici parolayla aynı veya iki alan eşleşmiyorsa kaydedilmez ve alan bazında hata gösterilir; geçerli parolayla değişim sonrası kullanıcı ana sayfaya ulaşır ve sonraki girişte yeni parola çalışır.
-- [ ] AC-12 — İK bir hesabın parolasını yeniden geçiciye çektiğinde kullanıcı sonraki girişte yine parola değiştirmeye zorlanır.
-- [ ] AC-13 — 30 dakika işlem yapılmayan oturum kapanır; sonraki istek reddedilir ve kullanıcı "Oturumunuzun süresi doldu…" mesajıyla giriş ekranına yönlenir. 30 dakikadan kısa aralıklarla işlem yapan kullanıcının oturumu açık kalır.
-- [ ] AC-14 — "Çıkış yap" oturumu sonlandırır; çıkış sonrası korunan bir sayfa veya API ucu reddedilir ve giriş ekranında "Çıkış yapıldı." gösterilir.
-- [ ] AC-15 — Ana sayfa giriş yapan kullanıcının adını, soyadını ve rollerini gösterir.
-- [ ] AC-16 — Yönetici ana sayfada yalnızca kendi doğrudan bağlı **aktif** çalışanlarını görür (dolaylı bağlılar ve pasifler görünmez), liste soyad, sonra ad olarak Türkçe alfabetik sıralıdır (ör. Çelik, Demir, Şahin, Yılmaz); yönetici olmayan kullanıcıda "Ekibim" bölümü yoktur.
-- [ ] AC-17 — Bir kullanıcı API üzerinden başka bir çalışanın bilgisini veya başka bir yöneticinin ekibini isteyemez; böyle bir istek 404 alır.
-- [ ] AC-18 — Giriş yapmamış kullanıcı ana sayfaya veya herhangi bir korunan API ucuna eriştiğinde reddedilir ve giriş ekranına yönlenir; sunucu durum sorgusu herkese açık kalır.
-- [ ] AC-19 — Giriş ve parola değiştirme istekleri CSRF koruması olmadan reddedilir; oturum çerezi `HttpOnly` ve `SameSite=Lax`'tır (üretim ayarlarında `Secure`).
-- [ ] AC-20 — Parolalar Argon2 ile saklanır; hiçbir yanıt veya log satırı parola, geçici parola ya da oturum anahtarı içermez.
-- [ ] AC-21 — Giriş ekranı ürün adını tek birincil başlık olarak ve sunucu bağlantı durumunu spec 0001'deki üç durumla göstermeye devam eder (spec 0001 AC-1…AC-4, AC-19, AC-20 geçerli).
-- [ ] AC-22 — Giriş, parola değiştirme ve ana sayfa ekranlarının listelenen her durumunda otomatik erişilebilirlik taraması WCAG 2.1 AA ihlali bulmaz; her alanın görünür etiketi vardır, hata mesajları alana bağlıdır ve gönderimden sonra odak ilk hataya taşınır.
-- [ ] AC-23 — Giriş → zorunlu parola değişimi → ana sayfa → çıkış akışı yalnız klavyeyle tamamlanabilir.
-- [ ] AC-24 — Sunucu üzerinde çalıştırılan komut, çalışan kaydıyla birlikte ilk İK hesabını oluşturur; oluşan hesap ilk girişte parola değiştirmeye zorlanır.
-- [ ] AC-25 — Son aktif İK hesabının İK yetkisini kaldırmak, hesabını veya çalışan kaydını pasif yapmak kaydedilmez ve hata gösterilir; ikinci bir aktif İK varken bu işlemler yapılabilir.
-- [ ] AC-26 — Kullanıcı adı büyük/küçük harf duyarsızdır: `HKacar` ile girişte `hkacar` hesabı kullanılır, `HKacar` adıyla ikinci hesap kaydedilmez; Türkçe karakter, boşluk veya `. _ -` dışı işaret içeren kullanıcı adı kaydedilmez.
-- [ ] AC-27 — Kilit sayacı yalnızca son 15 dakikadaki hatalı denemeleri sayar (15 dakikadan eski denemeler sayılmaz) ve başarılı bir giriş sayacı sıfırlar (4 hata + başarılı giriş + 4 hata kilitlemez).
-- [ ] AC-28 — Hesabı veya çalışan kaydı pasif yapılan kullanıcının açık oturumu bir sonraki isteğinde reddedilir ve kullanıcı giriş ekranına yönlenir.
+- [x] AC-1 — İK yönetim panelinden ad, soyad, işe giriş tarihi, yönetici ve aktif/pasif bilgisiyle çalışan oluşturabilir ve düzenleyebilir.
+- [x] AC-2 — Bir çalışanı kendi yöneticisi yapmak veya yönetici zincirinde döngü oluşturmak (A → B → A, A → B → C → A) kaydedilmez ve İK'ya hata gösterilir.
+- [x] AC-3 — İK bir çalışana kullanıcı adı ve geçici parolayla hesap açabilir; aynı kullanıcı adıyla ikinci hesap ve aynı çalışana ikinci hesap kaydedilmez.
+- [x] AC-4 — Rol türetme: aktif her çalışan Çalışan; en az bir aktif doğrudan bağlısı olan Yönetici; bağlılarının hepsi pasif olan Yönetici değil; İK yetkisi verilen İK. Roller birlikte bulunabilir.
+- [x] AC-5 — İK rolü olmayan giriş yapmış bir kullanıcı ve giriş yapmamış bir kullanıcı yönetim paneline erişemez.
+- [x] AC-6 — Doğru kullanıcı adı ve kalıcı parolayla giriş başarılı olur ve kullanıcı ana sayfaya ulaşır.
+- [x] AC-7 — Hatalı parola, var olmayan kullanıcı adı ve pasif hesap aynı yanıtı ve aynı "Kullanıcı adı veya parola hatalı." mesajını alır.
+- [x] AC-8 — Aynı kullanıcı adıyla 5. hatalı denemeden sonra o kullanıcı adı 15 dakika kilitlenir: kilitliyken doğru parola da reddedilir ve "Çok fazla hatalı deneme…" mesajı gösterilir; 15 dakika dolunca doğru parolayla giriş yapılabilir; 4 hatalı deneme kilitlemez.
+- [x] AC-9 — Var olmayan bir kullanıcı adı da 5 hatalı denemeden sonra aynı kilit mesajını alır.
+- [x] AC-10 — Geçici parolayla giren kullanıcı yeni parola belirleyene kadar parola değiştirme dışındaki her sayfa ve API ucunda reddedilir veya parola değiştirme ekranına yönlenir.
+- [x] AC-11 — Yeni parola 12 karakterden kısa, çok yaygın, yalnız rakam, geçici parolayla aynı veya iki alan eşleşmiyorsa kaydedilmez ve alan bazında hata gösterilir; geçerli parolayla değişim sonrası kullanıcı ana sayfaya ulaşır ve sonraki girişte yeni parola çalışır.
+- [x] AC-12 — İK bir hesabın parolasını yeniden geçiciye çektiğinde kullanıcı sonraki girişte yine parola değiştirmeye zorlanır.
+- [x] AC-13 — 30 dakika işlem yapılmayan oturum kapanır; sonraki istek reddedilir ve kullanıcı "Oturumunuzun süresi doldu…" mesajıyla giriş ekranına yönlenir. 30 dakikadan kısa aralıklarla işlem yapan kullanıcının oturumu açık kalır.
+- [x] AC-14 — "Çıkış yap" oturumu sonlandırır; çıkış sonrası korunan bir sayfa veya API ucu reddedilir ve giriş ekranında "Çıkış yapıldı." gösterilir.
+- [x] AC-15 — Ana sayfa giriş yapan kullanıcının adını, soyadını ve rollerini gösterir.
+- [x] AC-16 — Yönetici ana sayfada yalnızca kendi doğrudan bağlı **aktif** çalışanlarını görür (dolaylı bağlılar ve pasifler görünmez), liste soyad, sonra ad olarak Türkçe alfabetik sıralıdır (ör. Çelik, Demir, Şahin, Yılmaz); yönetici olmayan kullanıcıda "Ekibim" bölümü yoktur.
+- [x] AC-17 — Bir kullanıcı API üzerinden başka bir çalışanın bilgisini veya başka bir yöneticinin ekibini isteyemez; böyle bir istek 404 alır.
+- [x] AC-18 — Giriş yapmamış kullanıcı ana sayfaya veya herhangi bir korunan API ucuna eriştiğinde reddedilir ve giriş ekranına yönlenir; sunucu durum sorgusu herkese açık kalır.
+- [x] AC-19 — Giriş ve parola değiştirme istekleri CSRF koruması olmadan reddedilir; oturum çerezi `HttpOnly` ve `SameSite=Lax`'tır (üretim ayarlarında `Secure`).
+- [x] AC-20 — Parolalar Argon2 ile saklanır; hiçbir yanıt veya log satırı parola, geçici parola ya da oturum anahtarı içermez.
+- [x] AC-21 — Giriş ekranı ürün adını tek birincil başlık olarak ve sunucu bağlantı durumunu spec 0001'deki üç durumla göstermeye devam eder (spec 0001 AC-1…AC-4, AC-19, AC-20 geçerli).
+- [x] AC-22 — Giriş, parola değiştirme ve ana sayfa ekranlarının listelenen her durumunda otomatik erişilebilirlik taraması WCAG 2.1 AA ihlali bulmaz; her alanın görünür etiketi vardır, hata mesajları alana bağlıdır ve gönderimden sonra odak ilk hataya taşınır.
+- [x] AC-23 — Giriş → zorunlu parola değişimi → ana sayfa → çıkış akışı yalnız klavyeyle tamamlanabilir.
+- [x] AC-24 — Sunucu üzerinde çalıştırılan komut, çalışan kaydıyla birlikte ilk İK hesabını oluşturur; oluşan hesap ilk girişte parola değiştirmeye zorlanır.
+- [x] AC-25 — Son aktif İK hesabının İK yetkisini kaldırmak, hesabını veya çalışan kaydını pasif yapmak kaydedilmez ve hata gösterilir; ikinci bir aktif İK varken bu işlemler yapılabilir.
+- [x] AC-26 — Kullanıcı adı büyük/küçük harf duyarsızdır: `HKacar` ile girişte `hkacar` hesabı kullanılır, `HKacar` adıyla ikinci hesap kaydedilmez; Türkçe karakter, boşluk veya `. _ -` dışı işaret içeren kullanıcı adı kaydedilmez.
+- [x] AC-27 — Kilit sayacı yalnızca son 15 dakikadaki hatalı denemeleri sayar (15 dakikadan eski denemeler sayılmaz) ve başarılı bir giriş sayacı sıfırlar (4 hata + başarılı giriş + 4 hata kilitlemez).
+- [x] AC-28 — Hesabı veya çalışan kaydı pasif yapılan kullanıcının açık oturumu bir sonraki isteğinde reddedilir ve kullanıcı giriş ekranına yönlenir.
 
 ## Definition of Done
-- [ ] Every acceptance criterion mapped to proof (test or reproducible observation)
-- [ ] `scripts/check` green
-- [ ] Independent review done; real findings fixed, noise rejected with written rationale
-- [ ] Docs / ADRs updated if behavior or architecture changed
-- [ ] Spec moved to `specs/done/` (it becomes immutable there)
+- [x] Every acceptance criterion mapped to proof (test or reproducible observation)
+- [x] `scripts/check` green
+- [x] Independent review done; real findings fixed, noise rejected with written rationale
+- [x] Docs / ADRs updated if behavior or architecture changed
+- [x] Spec moved to `specs/done/` (it becomes immutable there)
 
 ## Scorecard (fill at ship — honest numbers make the process improvable)
 | Metric | Value |
 |---|---|
-| Spec revisions | |
-| Fix rounds | |
-| Review findings: real / noise | |
-| Regressions introduced | |
-| Bugs escaped to production | |
+| Spec revisions | 0 (onaydan sonra spec değişmedi) |
+| Fix rounds | 3 (review 1. tur, review 2. tur N1, verify) |
+| Review findings: real / noise | 21 / 2 — review 15 / 2 (M1–M4, L1–L10, N1 / N2 ve concurrency test notu), verify 6 / 0 (+3 ertelendi: verify 3–5, test borcu) |
+| Regressions introduced | 1 (N1: M4 düzeltmesindeki temizlik deadlock riski; merge'den önce yakalandı ve düzeltildi) |
+| Bugs escaped to production | 0 |
