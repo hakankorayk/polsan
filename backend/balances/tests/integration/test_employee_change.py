@@ -4,7 +4,13 @@ import datetime
 from decimal import Decimal
 from typing import Any
 
-from balances.api import after_employee_change, balance_of, before_employee_change, summary_of
+from balances.api import (
+    after_employee_change,
+    balance_of,
+    before_employee_change,
+    set_start_date,
+    summary_of,
+)
 from balances.models import LedgerEntry, LedgerKind
 from balances.tests.integration.conftest import D
 from tests.factories import Employee
@@ -99,3 +105,14 @@ def test_next_accrual_after_hire_date_moved_forward(started: None, employee: Emp
     assert unchanged == Decimal(90)  # nothing on 2027-03-10
     assert later.balance == Decimal(110)
     assert later.entries[0].effective_date == D(2029, 3, 10)
+
+
+def test_changes_before_start_date_set_no_floor(employee: Employee) -> None:
+    """AC-35 (review M3): setup changes made before the start date exists set no floor."""
+    _change(employee, D(2026, 10, 1), is_active=False)
+    _change(employee, D(2026, 10, 2), is_active=True)
+    _change(employee, D(2026, 10, 3), birth_date=D(1991, 1, 1))
+
+    set_start_date(D(2020, 1, 1))  # in the past: applies to this employee like to everyone
+
+    assert balance_of(employee.pk, D(2026, 10, 21)) == Decimal(90)  # years 1-6, none skipped

@@ -199,11 +199,19 @@ def before_employee_change(employee_id: int, today: datetime.date) -> Employment
 def after_employee_change(
     employee_id: int, today: datetime.date, before: EmploymentFacts | None
 ) -> None:
-    """Reactivation or a hire/birth date change: anniversaries before today no longer accrue."""
+    """Reactivation or a hire/birth date change: anniversaries before today no longer accrue.
+    Only once the start date is set: during setup, before it, a past start date must apply to
+    every employee alike (spec 0003, Req 4; review M3)."""
     after = employment_facts(employee_id)
-    if before is None or after is None:
+    if before is None or after is None or start_date() is None:
         return
     reactivated = after.is_active and not before.is_active
     dates_changed = (after.hire_date, after.birth_date) != (before.hire_date, before.birth_date)
     if reactivated or dates_changed:
         AccrualFloor.objects.update_or_create(employee_id=employee_id, defaults={"floor": today})
+
+
+def employee_created(employee_id: int, today: datetime.date) -> None:
+    """A record added today: its earlier anniversaries are HR's opening adjustment, never
+    automatic accruals (spec 0003, Req 4; review M3)."""
+    AccrualFloor.objects.update_or_create(employee_id=employee_id, defaults={"floor": today})

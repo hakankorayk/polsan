@@ -209,3 +209,23 @@ def test_admin_reactivation_does_not_backfill(hr_client: Client, employee: Emplo
     assert years_at_deactivation == [1, 2, 3, 4, 5, 6]
     assert employee.is_active
     assert balance_of(employee.pk, TODAY) == Decimal(90)
+
+
+def test_admin_created_employee_accrues_from_creation_day(
+    hr_client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """AC-34 (review M3): HR adds on 2026-10-21 an employee hired years ago. The 2026-05-01
+    anniversary predates the record (HR's opening adjustment covers it); 2027-05-01 accrues."""
+    set_start_date(D(2026, 1, 1))
+    hr_client.post(
+        "/admin/employees/employee/add/",
+        _employee_form(first_name="Geç", last_name="Kayıt", hire_date="2012-05-01"),
+    )
+    late = Employee.objects.get(first_name="Geç")
+
+    on_creation = balance_of(late.pk, TODAY)
+    monkeypatch.setattr(clock, "today", lambda: D(2027, 5, 1))
+    next_year = balance_of(late.pk, D(2027, 5, 1))
+
+    assert on_creation == Decimal(0)
+    assert next_year == Decimal(26)  # the 15th anniversary

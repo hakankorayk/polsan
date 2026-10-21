@@ -47,3 +47,11 @@ def test_start_date_locked_after_first_accrual(employee: Employee) -> None:
         set_start_date(D(2025, 1, 1))
     assert start_date() == D(2024, 1, 1)
     assert start_date_locked()
+
+
+def test_start_date_may_be_in_the_past(employee: Employee) -> None:
+    """AC-35: a start date before today is accepted and applies to past anniversaries."""
+    set_start_date(D(2022, 1, 1))
+
+    assert start_date() == D(2022, 1, 1)
+    assert balance_of(employee.pk, D(2026, 10, 21)) == Decimal(14 * 4 + 20)  # years 2-5 and 6

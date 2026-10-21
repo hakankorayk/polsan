@@ -89,6 +89,8 @@ class EmployeeAdmin(NoDeleteAdmin):
         super().save_model(request, obj, form, change)
         if change:
             balances.after_employee_change(obj.pk, today, before)
+        else:
+            balances.employee_created(obj.pk, today)
 
 
 class AdjustmentForm(forms.ModelForm):
