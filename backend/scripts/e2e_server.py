@@ -12,6 +12,7 @@ frontend/e2e/users.ts:
   klavye    temporary password (keyboard-only flow)
   kilit     permanent password (lockout scenario)
   cikis     permanent password (logout / expired session scenarios)
+  bekleyen  temporary password (pending-request states; never completes the change)
 """
 
 import datetime
@@ -56,6 +57,7 @@ def seed() -> None:
     account("klavye", employee("Klavye", "Kullanıcı"), TEMPORARY, True)
     account("kilit", employee("Kilit", "Kullanıcı"), PASSWORD, False)
     account("cikis", employee("Çıkış", "Kullanıcı"), PASSWORD, False)
+    account("bekleyen", employee("Bekleyen", "Kullanıcı"), TEMPORARY, True)
 
 
 def main() -> None:
