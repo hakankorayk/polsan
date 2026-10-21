@@ -51,7 +51,9 @@ export function BalanceSection() {
   return (
     <section aria-labelledby="balance-heading">
       <h2 id="balance-heading">İzin bakiyem</h2>
-      {state.kind === "loading" && <p role="status">{MESSAGES.balanceLoading}</p>}
+      {/* The live region is always in the DOM and only its text changes: screen readers skip a
+          region that arrives together with its content (review L2). */}
+      <p role="status">{state.kind === "loading" ? MESSAGES.balanceLoading : ""}</p>
       {state.kind === "error" && <p role="alert">{MESSAGES.balanceFailed}</p>}
       {state.kind === "ready" && <BalanceDetails summary={state.summary} />}
     </section>

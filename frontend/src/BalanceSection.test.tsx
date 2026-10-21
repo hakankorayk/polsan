@@ -91,6 +91,20 @@ describe("BalanceSection (spec 0003)", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Bakiye yükleniyor…");
   });
 
+  it("keeps the same live region and empties it once loaded (review L2)", async () => {
+    let answer!: (value: unknown) => void;
+    get.mockReturnValue(new Promise((resolve) => (answer = resolve)) as never);
+
+    render(<BalanceSection />);
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Bakiye yükleniyor…");
+    answer({ data: summary, response: new Response(null) });
+
+    expect(await screen.findByText(/^Bakiye:/)).toBeVisible();
+    expect(screen.getByRole("status")).toBe(status);
+    expect(status).toBeEmptyDOMElement();
+  });
+
   it.each([
     [
       "a problem response",
