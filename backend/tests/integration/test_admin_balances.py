@@ -251,3 +251,22 @@ def test_admin_missed_anniversary_while_inactive_is_not_backfilled(
     assert after_reactivation == Decimal(14 * 5)  # years 1-5; year 6 (2026-03-10) missed
     assert next_anniversary == Decimal(14 * 5 + 20)
     assert sorted(year for year in years if year is not None) == [1, 2, 3, 4, 5, 7]
+
+
+def test_start_date_form_turns_a_concurrent_lock_into_a_form_error(
+    hr_client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """AC-37 (review N1): the form checks through the locking call, so a read that accrued with
+    the old date in the meantime becomes a form error, never a 500."""
+    from balances import api as balances_api
+
+    def concurrent_accrual_won(value: datetime.date | None) -> None:
+        raise balances_api.StartDateLockedError(balances_api.StartDateLockedError.message)
+
+    monkeypatch.setattr(balances_api, "check_start_date_change", concurrent_accrual_won)
+
+    response = hr_client.post("/admin/balances/accrualsettings/add/", {"start_date": "2024-01-01"})
+
+    assert response.status_code == 200
+    assert _errors(response, "start_date") == ["accrual_start_locked"]
+    assert start_date() is None
