@@ -1,6 +1,6 @@
 # Spec 0003 — Hak ediş ve izin bakiyesi
 
-- Status: In progress
+- Status: Shipped
 - Mode: lite
 - Plan: `specs/plans/0003-plan.md`
 
@@ -150,56 +150,56 @@ Netleştirme kararları (2026-10-21):
   - Bakiye bildirimleri (e-posta vb.), raporlar ve dışa aktarma.
 
 ## Acceptance criteria
-- [ ] AC-1 — İK, doğum tarihi olmadan çalışan oluşturamaz veya kaydedemez; alan bazında hata gösterilir.
-- [ ] AC-2 — Bugünden sonraki veya işe giriş tarihine eşit ya da ondan sonraki doğum tarihi kaydedilmez ve alan bazında hata gösterilir.
-- [ ] AC-3 — Doğum tarihi, uygulamanın hiçbir yanıtında ve ekranında (ana sayfa dahil) çalışana veya yöneticiye görünmez.
-- [ ] AC-4 — İşe girişten 1 tam yıl dolmamış çalışanın hak ediş hareketi yoktur; 1. yıldönümü günü 14 günlük hak ediş görünür, bir gün öncesinde görünmez.
-- [ ] AC-5 — Kademe sınırları: 5. yıldönümünde 14, 6. yıldönümünde 20, 14. yıldönümünde 20, 15. yıldönümünde 26 gün eklenir.
-- [ ] AC-6 — Yaş tabanı: yıldönümü günü 18 yaşında veya daha küçük ya da 50 yaşında veya daha büyük olan çalışana 1.–5. yıllarda 20 gün eklenir. 19 ve 49 yaşındakine 14 gün eklenir. 15. yıl ve sonrasında 26 gün değişmez.
-- [ ] AC-7 — Yaş, yıldönümü günündeki tamamlanmış yaştır: 50. doğum günü yıldönümünden bir gün sonra olan çalışana BR-1 değeri (ör. 14) eklenir. 50. doğum günü yıldönümü günü olana 20 eklenir.
-- [ ] AC-8 — 29 Şubat'ta işe giren çalışanın artık olmayan yıldaki yıldönümü hak edişi 28 Şubat'ta görünür.
-- [ ] AC-9 — Otomatik hak ediş başlangıç tarihi girilmemişse hiçbir otomatik hak ediş hareketi oluşmaz.
-- [ ] AC-10 — Başlangıç tarihinden önceye düşen yıldönümleri için hak ediş oluşmaz. Başlangıç tarihine veya sonrasına düşen yıldönümü için oluşur.
-- [ ] AC-11 — İlk otomatik hak ediş oluştuktan sonra başlangıç tarihi değiştirilemez ve İK'ya hata gösterilir. Öncesinde değiştirilebilir.
-- [ ] AC-12 — Aynı yıldönümü için hak ediş hareketi tam bir kez oluşur: bakiye tekrar tekrar ve eşzamanlı sorgulansa da ikinci hareket oluşmaz.
-- [ ] AC-13 — Birden çok yıldönümü (sorgulanmadan geçen yıllar) başlangıç tarihinden sonra birikmişse her biri kendi kademesi ve o günkü yaşıyla ayrı birer hareket olarak görünür.
-- [ ] AC-14 — Yıldönümü günü pasif olan çalışana o yıldönümü için hak ediş oluşmaz. Yeniden aktif yapıldığında da sonradan eklenmez.
-- [ ] AC-15 — İK işe giriş veya doğum tarihini değiştirdiğinde mevcut hak ediş hareketleri değişmez. Sonraki yıldönümü yeni tarihlerle hesaplanır.
-- [ ] AC-16 — İK; artı, eksi ve 0,5 katı miktarla, gerekçeli düzeltme ekleyebilir. Bakiye ve hareket geçmişi buna göre değişir.
-- [ ] AC-17 — Miktarı 0, 0,5'in katı olmayan (ör. 1,3), mutlak değeri 100'den büyük veya gerekçesi boş ya da yalnız boşluk olan düzeltme kaydedilmez. Alan bazında hata gösterilir.
-- [ ] AC-18 — Bakiyeyi sıfırın altına indiren İK düzeltmesi kaydedilir ve bakiye eksi görünür.
-- [ ] AC-19 — Hak ediş ve düzeltme hareketleri yönetim panelinde dahil kimse tarafından değiştirilemez veya silinemez.
-- [ ] AC-20 — Her düzeltme için audit kaydı oluşur: kim, ne zaman, çalışan, miktar, gerekçe. Audit kaydı değiştirilemez ve silinemez.
-- [ ] AC-21 — Yıl sonunu geçen bakiye aynen devreder: 31 Aralık ve 1 Ocak'taki bakiye aynıdır, arada hiçbir hareket oluşmaz.
-- [ ] AC-22 — Ana sayfada "İzin bakiyem" bölümü giriş yapanın güncel bakiyesini, sonraki hak ediş tarihini ve gün sayısını gösterir.
-- [ ] AC-23 — Sonraki yıldönümü başlangıç tarihinden önceyse veya başlangıç tarihi girilmemişse "Sonraki hak ediş" satırı gösterilmez.
-- [ ] AC-24 — Hareket geçmişi yeniden eskiye sıralıdır. Her satırda tarih, tür (Hak ediş / Düzeltme), işaretli miktar ve düzeltmelerde gerekçe vardır.
-- [ ] AC-25 — Gün miktarları Türkçe biçimdedir ("12,5 gün", "+14 gün", "−2 gün").
-- [ ] AC-26 — Hiç hareketi olmayan çalışan "0 gün" ve "Henüz bakiye hareketiniz yok." görür.
-- [ ] AC-27 — Bakiye yüklenirken "Bakiye yükleniyor…" görünür.
-- [ ] AC-28 — Bakiye yüklenemezse "Bakiye bilgileriniz yüklenemedi. Lütfen sayfayı yenileyin." görünür; ana sayfanın geri kalanı görünmeye devam eder.
-- [ ] AC-29 — Bir kullanıcı başka bir çalışanın bakiyesini veya hareketlerini istediğinde "bulunamadı" (404) alır. Giriş yapmamış kullanıcı hiçbir bakiye verisine erişemez.
-- [ ] AC-30 — İK yönetim panelinde her çalışanın bakiyesini ve hareketlerini görür, hareketleri çalışana göre süzebilir. İK olmayan kullanıcı panele giremez.
-- [ ] AC-31 — "İzin bakiyem" bölümü yükleniyor, boş, başarı ve hata durumlarında axe denetiminden ihlalsiz geçer ve yalnız klavyeyle gezilebilir.
-- [ ] AC-32 — Spec 0001 ve 0002'nin bütün kabul kriterleri geçerli kalır (regresyon yok).
-- [ ] AC-33 — 29 Şubat doğumlu çalışan, artık olmayan yılda 28 Şubat'a denk gelen yıldönümünde yeni yaşını doldurmuş sayılır (ör. 1976-02-29 doğumluya 2026-02-28'de 50 yaşında 20 gün eklenir).
-- [ ] AC-34 — İK'nın sisteme eklediği çalışan için, kaydın eklendiği günden önceki yıldönümlerine otomatik hak ediş oluşmaz; eklendiği gün veya sonrasındaki yıldönümleri için oluşur.
-- [ ] AC-35 — Başlangıç tarihi girilmeden önce yapılan yeniden aktif yapma veya tarih düzeltmesi sınır oluşturmaz; sonradan girilen geçmiş başlangıç tarihi o çalışanlara da diğerleriyle aynı uygulanır. Başlangıç tarihi geçmiş bir gün olarak kaydedilebilir.
-- [ ] AC-36 — İşe giriş tarihi ileri kaydırılan çalışanın "Sonraki hak ediş" satırı, defterde hak edişi olan kıdem yıllarını atlayıp gerçekten oluşacak ilk hak edişi gösterir; o tarihte o hak ediş oluşur.
-- [ ] AC-37 — Başlangıç tarihi değişikliği, eski tarihle hak ediş yazan eşzamanlı bir bakiye okumasıyla çakışırsa değişiklik reddedilir ve İK'ya form hatası gösterilir (500 değil); ayar ile defter tutarlı kalır.
+- [x] AC-1 — İK, doğum tarihi olmadan çalışan oluşturamaz veya kaydedemez; alan bazında hata gösterilir.
+- [x] AC-2 — Bugünden sonraki veya işe giriş tarihine eşit ya da ondan sonraki doğum tarihi kaydedilmez ve alan bazında hata gösterilir.
+- [x] AC-3 — Doğum tarihi, uygulamanın hiçbir yanıtında ve ekranında (ana sayfa dahil) çalışana veya yöneticiye görünmez.
+- [x] AC-4 — İşe girişten 1 tam yıl dolmamış çalışanın hak ediş hareketi yoktur; 1. yıldönümü günü 14 günlük hak ediş görünür, bir gün öncesinde görünmez.
+- [x] AC-5 — Kademe sınırları: 5. yıldönümünde 14, 6. yıldönümünde 20, 14. yıldönümünde 20, 15. yıldönümünde 26 gün eklenir.
+- [x] AC-6 — Yaş tabanı: yıldönümü günü 18 yaşında veya daha küçük ya da 50 yaşında veya daha büyük olan çalışana 1.–5. yıllarda 20 gün eklenir. 19 ve 49 yaşındakine 14 gün eklenir. 15. yıl ve sonrasında 26 gün değişmez.
+- [x] AC-7 — Yaş, yıldönümü günündeki tamamlanmış yaştır: 50. doğum günü yıldönümünden bir gün sonra olan çalışana BR-1 değeri (ör. 14) eklenir. 50. doğum günü yıldönümü günü olana 20 eklenir.
+- [x] AC-8 — 29 Şubat'ta işe giren çalışanın artık olmayan yıldaki yıldönümü hak edişi 28 Şubat'ta görünür.
+- [x] AC-9 — Otomatik hak ediş başlangıç tarihi girilmemişse hiçbir otomatik hak ediş hareketi oluşmaz.
+- [x] AC-10 — Başlangıç tarihinden önceye düşen yıldönümleri için hak ediş oluşmaz. Başlangıç tarihine veya sonrasına düşen yıldönümü için oluşur.
+- [x] AC-11 — İlk otomatik hak ediş oluştuktan sonra başlangıç tarihi değiştirilemez ve İK'ya hata gösterilir. Öncesinde değiştirilebilir.
+- [x] AC-12 — Aynı yıldönümü için hak ediş hareketi tam bir kez oluşur: bakiye tekrar tekrar ve eşzamanlı sorgulansa da ikinci hareket oluşmaz.
+- [x] AC-13 — Birden çok yıldönümü (sorgulanmadan geçen yıllar) başlangıç tarihinden sonra birikmişse her biri kendi kademesi ve o günkü yaşıyla ayrı birer hareket olarak görünür.
+- [x] AC-14 — Yıldönümü günü pasif olan çalışana o yıldönümü için hak ediş oluşmaz. Yeniden aktif yapıldığında da sonradan eklenmez.
+- [x] AC-15 — İK işe giriş veya doğum tarihini değiştirdiğinde mevcut hak ediş hareketleri değişmez. Sonraki yıldönümü yeni tarihlerle hesaplanır.
+- [x] AC-16 — İK; artı, eksi ve 0,5 katı miktarla, gerekçeli düzeltme ekleyebilir. Bakiye ve hareket geçmişi buna göre değişir.
+- [x] AC-17 — Miktarı 0, 0,5'in katı olmayan (ör. 1,3), mutlak değeri 100'den büyük veya gerekçesi boş ya da yalnız boşluk olan düzeltme kaydedilmez. Alan bazında hata gösterilir.
+- [x] AC-18 — Bakiyeyi sıfırın altına indiren İK düzeltmesi kaydedilir ve bakiye eksi görünür.
+- [x] AC-19 — Hak ediş ve düzeltme hareketleri yönetim panelinde dahil kimse tarafından değiştirilemez veya silinemez.
+- [x] AC-20 — Her düzeltme için audit kaydı oluşur: kim, ne zaman, çalışan, miktar, gerekçe. Audit kaydı değiştirilemez ve silinemez.
+- [x] AC-21 — Yıl sonunu geçen bakiye aynen devreder: 31 Aralık ve 1 Ocak'taki bakiye aynıdır, arada hiçbir hareket oluşmaz.
+- [x] AC-22 — Ana sayfada "İzin bakiyem" bölümü giriş yapanın güncel bakiyesini, sonraki hak ediş tarihini ve gün sayısını gösterir.
+- [x] AC-23 — Sonraki yıldönümü başlangıç tarihinden önceyse veya başlangıç tarihi girilmemişse "Sonraki hak ediş" satırı gösterilmez.
+- [x] AC-24 — Hareket geçmişi yeniden eskiye sıralıdır. Her satırda tarih, tür (Hak ediş / Düzeltme), işaretli miktar ve düzeltmelerde gerekçe vardır.
+- [x] AC-25 — Gün miktarları Türkçe biçimdedir ("12,5 gün", "+14 gün", "−2 gün").
+- [x] AC-26 — Hiç hareketi olmayan çalışan "0 gün" ve "Henüz bakiye hareketiniz yok." görür.
+- [x] AC-27 — Bakiye yüklenirken "Bakiye yükleniyor…" görünür.
+- [x] AC-28 — Bakiye yüklenemezse "Bakiye bilgileriniz yüklenemedi. Lütfen sayfayı yenileyin." görünür; ana sayfanın geri kalanı görünmeye devam eder.
+- [x] AC-29 — Bir kullanıcı başka bir çalışanın bakiyesini veya hareketlerini istediğinde "bulunamadı" (404) alır. Giriş yapmamış kullanıcı hiçbir bakiye verisine erişemez.
+- [x] AC-30 — İK yönetim panelinde her çalışanın bakiyesini ve hareketlerini görür, hareketleri çalışana göre süzebilir. İK olmayan kullanıcı panele giremez.
+- [x] AC-31 — "İzin bakiyem" bölümü yükleniyor, boş, başarı ve hata durumlarında axe denetiminden ihlalsiz geçer ve yalnız klavyeyle gezilebilir.
+- [x] AC-32 — Spec 0001 ve 0002'nin bütün kabul kriterleri geçerli kalır (regresyon yok).
+- [x] AC-33 — 29 Şubat doğumlu çalışan, artık olmayan yılda 28 Şubat'a denk gelen yıldönümünde yeni yaşını doldurmuş sayılır (ör. 1976-02-29 doğumluya 2026-02-28'de 50 yaşında 20 gün eklenir).
+- [x] AC-34 — İK'nın sisteme eklediği çalışan için, kaydın eklendiği günden önceki yıldönümlerine otomatik hak ediş oluşmaz; eklendiği gün veya sonrasındaki yıldönümleri için oluşur.
+- [x] AC-35 — Başlangıç tarihi girilmeden önce yapılan yeniden aktif yapma veya tarih düzeltmesi sınır oluşturmaz; sonradan girilen geçmiş başlangıç tarihi o çalışanlara da diğerleriyle aynı uygulanır. Başlangıç tarihi geçmiş bir gün olarak kaydedilebilir.
+- [x] AC-36 — İşe giriş tarihi ileri kaydırılan çalışanın "Sonraki hak ediş" satırı, defterde hak edişi olan kıdem yıllarını atlayıp gerçekten oluşacak ilk hak edişi gösterir; o tarihte o hak ediş oluşur.
+- [x] AC-37 — Başlangıç tarihi değişikliği, eski tarihle hak ediş yazan eşzamanlı bir bakiye okumasıyla çakışırsa değişiklik reddedilir ve İK'ya form hatası gösterilir (500 değil); ayar ile defter tutarlı kalır.
 
 ## Definition of Done
-- [ ] Every acceptance criterion mapped to proof (test or reproducible observation)
-- [ ] `scripts/check` green
-- [ ] Independent review done; real findings fixed, noise rejected with written rationale
-- [ ] Docs / ADRs updated if behavior or architecture changed
-- [ ] Spec moved to `specs/done/` (it becomes immutable there)
+- [x] Every acceptance criterion mapped to proof (test or reproducible observation)
+- [x] `scripts/check` green
+- [x] Independent review done; real findings fixed, noise rejected with written rationale
+- [x] Docs / ADRs updated if behavior or architecture changed
+- [x] Spec moved to `specs/done/` (it becomes immutable there)
 
 ## Scorecard (fill at ship — honest numbers make the process improvable)
 | Metric | Value |
 |---|---|
-| Spec revisions | |
-| Fix rounds | |
-| Review findings: real / noise | |
-| Regressions introduced | |
-| Bugs escaped to production | |
+| Spec revisions | 1 (review 1. tur sonrası R-08: Req 2, 4, 5, 6, 11; AC-33…AC-37) |
+| Fix rounds | 2 (review 1. tur: M1–M3, L1–L3, L5; 2. tur: N1, N2) |
+| Review findings: real / noise | 10 / 9 — review 9 / 3 (M1–M3, L1–L3, L5, N1, N2 / L4, P1, P2), verify 1 / 6 (1 / 2–7) |
+| Regressions introduced | 0 |
+| Bugs escaped to production | 0 |
