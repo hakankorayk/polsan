@@ -5,7 +5,7 @@ import uuid
 from dataclasses import dataclass
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import connection, transaction
 from django.db.models import Sum
 
 from audit.api import record
@@ -15,6 +15,10 @@ from balances.models import AccrualFloor, AccrualSettings, LedgerEntry, LedgerKi
 from employees.api import EmploymentFacts, employment_facts
 
 ADJUSTMENT_ACTION = "balance.adjustment"
+# PostgreSQL advisory lock guarding the start date (review M1): every accrual write holds it
+# shared, a start date change holds it exclusive. Raw SQL because the ORM has no shared row lock
+# (FOR SHARE); FOR UPDATE on the settings row would serialise every balance read.
+START_DATE_LOCK = 3_000_301
 
 
 class StartDateLockedError(Exception):
@@ -51,10 +55,24 @@ def start_date_locked() -> bool:
     return LedgerEntry.objects.filter(kind=LedgerKind.ACCRUAL).exists()
 
 
+def _lock_start_date_shared() -> None:
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT pg_advisory_xact_lock_shared(%s)", [START_DATE_LOCK])
+
+
+def check_start_date_change(value: datetime.date | None) -> None:
+    """Raise StartDateLockedError if ``value`` may not become the start date. Takes the exclusive
+    lock until the end of the caller's transaction, so a concurrent read cannot write accruals
+    with the old date between this check and the save (review M1). Call it inside a transaction."""
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT pg_advisory_xact_lock(%s)", [START_DATE_LOCK])
+    if start_date_locked() and value != start_date():
+        raise StartDateLockedError(StartDateLockedError.message)
+
+
 def set_start_date(value: datetime.date | None) -> None:
     with transaction.atomic():
-        if start_date_locked() and value != start_date():
-            raise StartDateLockedError(StartDateLockedError.message)
+        check_start_date_change(value)
         AccrualSettings.objects.update_or_create(key=1, defaults={"start_date": value})
 
 
@@ -66,10 +84,17 @@ def _floor(employee_id: int) -> datetime.date | None:
 
 def materialize_accruals(employee_id: int, today: datetime.date) -> None:
     """Write the accruals due by ``today`` that the ledger lacks. Safe to call concurrently: the
-    one-accrual-per-seniority-year constraint turns a racing duplicate into a no-op."""
+    one-accrual-per-seniority-year constraint turns a racing duplicate into a no-op, and the
+    shared start date lock keeps a concurrent start date change from interleaving."""
     facts = employment_facts(employee_id)
     if facts is None or not facts.is_active:
         return
+    with transaction.atomic():
+        _lock_start_date_shared()
+        _write_due_accruals(employee_id, facts, today)
+
+
+def _write_due_accruals(employee_id: int, facts: EmploymentFacts, today: datetime.date) -> None:
     years = LedgerEntry.objects.filter(
         employee_id=employee_id, kind=LedgerKind.ACCRUAL
     ).values_list("seniority_year", flat=True)

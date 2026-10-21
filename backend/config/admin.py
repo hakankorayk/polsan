@@ -153,10 +153,12 @@ class AccrualSettingsForm(forms.ModelForm):
 
     def clean_start_date(self) -> Any:
         value = self.cleaned_data.get("start_date")
-        if balances.start_date_locked() and value != balances.start_date():
-            raise forms.ValidationError(
-                balances.StartDateLockedError.message, code=balances.StartDateLockedError.code
-            )
+        # The admin view runs in one transaction: the lock taken here holds until the save, so
+        # the check cannot go stale and the save cannot fail with a 500 (review M1).
+        try:
+            balances.check_start_date_change(value)
+        except balances.StartDateLockedError as error:
+            raise forms.ValidationError(error.message, code=error.code) from error
         return value
 
 
