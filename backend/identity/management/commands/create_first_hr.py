@@ -1,7 +1,7 @@
 """Create the first HR account with its employee (spec 0002, AC-24).
 
     python manage.py create_first_hr --username ikadmin --first-name Ayşe --last-name Yılmaz \
-        --hire-date 2020-01-01
+        --hire-date 2020-01-01 --birth-date 1985-06-15
 
 The temporary password is read from FIRST_HR_PASSWORD or asked interactively; it is never a
 command-line argument (it would land in shell history). The account must change it at first login.
@@ -30,6 +30,7 @@ class Command(BaseCommand):
         parser.add_argument("--first-name", required=True)
         parser.add_argument("--last-name", required=True)
         parser.add_argument("--hire-date", required=True, type=datetime.date.fromisoformat)
+        parser.add_argument("--birth-date", required=True, type=datetime.date.fromisoformat)
 
     def handle(self, *args: Any, **options: Any) -> None:
         if active_hr_count() > 0:
@@ -40,9 +41,15 @@ class Command(BaseCommand):
         except ValidationError as error:
             raise CommandError(" ".join(error.messages)) from error
         with transaction.atomic():
-            employee_id = create_employee(
-                options["first_name"], options["last_name"], options["hire_date"]
-            )
+            try:
+                employee_id = create_employee(
+                    options["first_name"],
+                    options["last_name"],
+                    options["hire_date"],
+                    options["birth_date"],
+                )
+            except ValidationError as error:
+                raise CommandError(" ".join(error.messages)) from error
             try:
                 user = User.objects.create_user(
                     options["username"],

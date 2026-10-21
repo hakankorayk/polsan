@@ -24,7 +24,13 @@ def hr_client(make_user, make_employee) -> Client:
 
 
 def _employee_form(first: str, last: str, manager: str = "", active: bool = True) -> dict:
-    data = {"first_name": first, "last_name": last, "hire_date": "2021-03-15", "manager": manager}
+    data = {
+        "first_name": first,
+        "last_name": last,
+        "hire_date": "2021-03-15",
+        "birth_date": "1990-04-23",
+        "manager": manager,
+    }
     if active:
         data["is_active"] = "on"
     return data

@@ -39,6 +39,7 @@ def seed() -> None:
             first_name=first,
             last_name=last,
             hire_date=datetime.date(2020, 1, 1),
+            birth_date=datetime.date(1990, 1, 1),
             manager=manager,
             is_active=active,
         )

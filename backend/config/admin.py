@@ -40,7 +40,7 @@ hr_admin_site = HRAdminSite(name="hr_admin")
 class EmployeeAdminForm(forms.ModelForm):
     class Meta:
         model = Employee
-        fields = ["first_name", "last_name", "hire_date", "manager", "is_active"]
+        fields = ["first_name", "last_name", "hire_date", "birth_date", "manager", "is_active"]
 
     def clean(self) -> dict[str, Any]:
         data = super().clean() or {}
