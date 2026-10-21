@@ -6,5 +6,6 @@ from config.health import HealthView
 urlpatterns = [
     path("api/health/", HealthView.as_view(), name="health"),
     path("", include("identity.urls")),
+    path("", include("balances.urls")),
     path("admin/", hr_admin_site.urls),
 ]

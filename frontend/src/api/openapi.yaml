@@ -55,6 +55,20 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/balance/:
+    get:
+      operationId: balance_retrieve
+      tags:
+      - balance
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceSummary'
+          description: ''
   /api/health/:
     get:
       operationId: health_retrieve
@@ -89,6 +103,25 @@ paths:
           description: ''
 components:
   schemas:
+    BalanceSummary:
+      type: object
+      properties:
+        balance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,1})?$
+        next_accrual:
+          allOf:
+          - $ref: '#/components/schemas/NextAccrual'
+          nullable: true
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LedgerEntry'
+      required:
+      - balance
+      - entries
+      - next_accrual
     Health:
       type: object
       properties:
@@ -96,6 +129,40 @@ components:
           $ref: '#/components/schemas/StatusEnum'
       required:
       - status
+    KindEnum:
+      enum:
+      - ACCRUAL
+      - ADJUSTMENT
+      type: string
+      description: |-
+        * `ACCRUAL` - Hak ediş
+        * `ADJUSTMENT` - Düzeltme
+    LedgerEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,1})?$
+        reason:
+          type: string
+          nullable: true
+          description: Adjustments carry HR's reason; accruals have none.
+          readOnly: true
+      required:
+      - amount
+      - date
+      - id
+      - kind
+      - reason
     Login:
       type: object
       properties:
@@ -115,6 +182,19 @@ components:
           type: boolean
       required:
       - must_change_password
+    NextAccrual:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        days:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,1})?$
+      required:
+      - date
+      - days
     PasswordChange:
       type: object
       properties:

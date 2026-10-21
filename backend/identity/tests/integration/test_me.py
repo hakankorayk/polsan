@@ -87,3 +87,14 @@ def test_guessed_id_routes_return_404(client, make_user, make_employee) -> None:
         f"/api/employees/{uuid.uuid4()}/",
     ):
         assert client.get(route).status_code == 404, route
+
+
+def test_me_has_no_birth_date(client, make_user) -> None:
+    """Spec 0003 — AC-3: the birth date is personal data, HR sees it in the admin only."""
+    make_user("ayilmaz")
+    log_in(client, "ayilmaz")
+
+    body = client.get("/api/me/").content.decode()
+
+    assert "birth" not in body
+    assert "1990-01-01" not in body  # the factory's birth date
