@@ -94,13 +94,21 @@ def materialize_accruals(employee_id: int, today: datetime.date) -> None:
         _write_due_accruals(employee_id, facts, today)
 
 
-def _write_due_accruals(employee_id: int, facts: EmploymentFacts, today: datetime.date) -> None:
+def _accrued_years(employee_id: int) -> frozenset[int]:
     years = LedgerEntry.objects.filter(
         employee_id=employee_id, kind=LedgerKind.ACCRUAL
     ).values_list("seniority_year", flat=True)
-    existing = frozenset(year for year in years if year is not None)  # never None: DB check
+    return frozenset(year for year in years if year is not None)  # never None: DB check
+
+
+def _write_due_accruals(employee_id: int, facts: EmploymentFacts, today: datetime.date) -> None:
     due = due_accruals(
-        facts.hire_date, facts.birth_date, start_date(), _floor(employee_id), today, existing
+        facts.hire_date,
+        facts.birth_date,
+        start_date(),
+        _floor(employee_id),
+        today,
+        _accrued_years(employee_id),
     )
     LedgerEntry.objects.bulk_create(
         [
@@ -143,7 +151,12 @@ def summary_of(employee_id: int, today: datetime.date) -> BalanceSummary:
     upcoming = None
     if facts.is_active:
         upcoming = next_accrual(
-            facts.hire_date, facts.birth_date, start_date(), _floor(employee_id), today
+            facts.hire_date,
+            facts.birth_date,
+            start_date(),
+            _floor(employee_id),
+            today,
+            _accrued_years(employee_id),
         )
     return BalanceSummary(balance, upcoming, entries)
 

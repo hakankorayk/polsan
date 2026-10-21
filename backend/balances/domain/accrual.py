@@ -87,12 +87,15 @@ def next_accrual(
     start: datetime.date | None,
     floor: datetime.date | None,
     today: datetime.date,
+    existing_years: frozenset[int] = frozenset(),
 ) -> Accrual | None:
-    """The first accrual after ``today``, or None if it would not be made automatically."""
+    """The first accrual after ``today`` that will really be made, or None if it would not be made
+    automatically. Seniority years already in the ledger are skipped: after HR moves the hire date
+    forward, they never accrue again (spec 0003, Req 6 and 11; review M2)."""
     if start is None:
         return None
     year = max(completed_years(hire, today), 0) + 1
-    if anniversary(hire, year) <= today:  # 29 Feb hire on 28 Feb: the anniversary is today
+    while anniversary(hire, year) <= today or year in existing_years:
         year += 1
     upcoming = _accrual(hire, birth, year)
     return upcoming if upcoming.date >= _lower_bound(start, floor) else None

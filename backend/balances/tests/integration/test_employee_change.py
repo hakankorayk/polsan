@@ -84,3 +84,18 @@ def test_birth_date_change_applies_to_next_anniversary(started: None, employee: 
         (Decimal(20), D(2022, 3, 10)),
         (Decimal(14), D(2021, 3, 10)),
     ]
+
+
+def test_next_accrual_after_hire_date_moved_forward(started: None, employee: Employee) -> None:
+    """AC-36 (review M2): the next accrual line shows the accrual that will really be made."""
+    balance_of(employee.pk, D(2026, 10, 21))  # years 1-6
+    _change(employee, D(2026, 10, 21), hire_date=D(2022, 3, 10))
+
+    upcoming = summary_of(employee.pk, D(2026, 10, 21)).next_accrual
+    unchanged = summary_of(employee.pk, D(2027, 3, 10)).balance
+    later = summary_of(employee.pk, D(2029, 3, 10))
+
+    assert upcoming is not None and (upcoming.date, upcoming.days) == (D(2029, 3, 10), Decimal(20))
+    assert unchanged == Decimal(90)  # nothing on 2027-03-10
+    assert later.balance == Decimal(110)
+    assert later.entries[0].effective_date == D(2029, 3, 10)

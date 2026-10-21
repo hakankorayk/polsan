@@ -157,3 +157,19 @@ def test_no_next_accrual_before_start_or_without_start() -> None:
     assert next_accrual(HIRE, BORN_30, None, None, D(2026, 10, 21)) is None
     assert next_accrual(HIRE, BORN_30, D(2027, 3, 11), None, D(2026, 10, 21)) is None
     assert next_accrual(HIRE, BORN_30, D(2027, 3, 10), None, D(2026, 10, 21)) is not None
+
+
+def test_next_accrual_skips_years_already_in_ledger() -> None:
+    """AC-36 (review M2): hired 2020-03-10, years 1-6 accrued, hire date moved to 2022-03-10.
+    Years 5 and 6 of the new dates are in the ledger already: the next real accrual is year 7."""
+    moved = D(2022, 3, 10)
+    accrued = frozenset(range(1, 7))
+    today = D(2026, 10, 21)
+
+    upcoming = next_accrual(moved, BORN_30, START, today, today, accrued)
+
+    assert upcoming == Accrual(7, D(2029, 3, 10), Decimal(20))
+    assert due_accruals(moved, BORN_30, START, today, D(2027, 3, 10), accrued) == []
+    assert _days(due_accruals(moved, BORN_30, START, today, D(2029, 3, 10), accrued)) == [
+        (7, Decimal(20))
+    ]
