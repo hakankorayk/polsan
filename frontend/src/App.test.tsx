@@ -23,10 +23,12 @@ function server(...meAnswers: unknown[]) {
   get.mockImplementation(((path: string) => {
     if (path === "/api/health/") return Promise.resolve(ok({ status: "ok" }));
     if (path === "/api/auth/csrf/") return Promise.resolve({ response: new Response(null) });
+    if (path === "/api/balance/") return Promise.resolve(ok(emptyBalance)); // spec 0003
     return Promise.resolve(meAnswers.length > 1 ? meAnswers.shift() : meAnswers[0]);
   }) as never);
 }
 
+const emptyBalance = { balance: "0.0", next_accrual: null, entries: [] };
 const profile = { first_name: "Ayşe", last_name: "Yılmaz", roles: ["employee"], team: null };
 
 beforeEach(() => window.sessionStorage.clear());
@@ -110,6 +112,7 @@ describe("App", () => {
     get.mockImplementation(((path: string) => {
       if (path === "/api/health/") return Promise.resolve(ok({ status: "ok" }));
       if (path === "/api/auth/csrf/") return Promise.resolve({ response: new Response(null) });
+      if (path === "/api/balance/") return Promise.resolve(ok(emptyBalance)); // spec 0003
       meCalls += 1;
       if (meCalls === 1) return Promise.resolve(problem(403, "not_authenticated"));
       return new Promise((r) => (resolveMe = r));
