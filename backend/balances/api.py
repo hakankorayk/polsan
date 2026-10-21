@@ -3,7 +3,10 @@
 Other modules may import only this module (docs/architecture.md, Forbidden dependencies 1).
 """
 
-from balances.domain.amounts import AdjustmentError
+import datetime
+
+from balances import clock
+from balances.domain.amounts import AdjustmentError, validate_adjustment_amount, validate_reason
 from balances.models import ImmutableEntryError
 from balances.services import (
     BalanceSummary,
@@ -37,4 +40,12 @@ __all__ = [
     "start_date",
     "start_date_locked",
     "summary_of",
+    "today",
+    "validate_adjustment_amount",
+    "validate_reason",
 ]
+
+
+def today() -> datetime.date:
+    """The date accruals are computed for (Europe/Istanbul); callers outside the module use it."""
+    return clock.today()
