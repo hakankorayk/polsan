@@ -33,7 +33,9 @@ Netleştirme kararları (2026-10-21):
    (yönetim paneli); çalışana ve yöneticiye gösterilmez.
 2. **Kıdem:** Kıdem, Polsan'daki işe giriş tarihinden itibaren tamamlanan tam hizmet yılıdır
    (BR-15). n'inci kıdem yıldönümü, işe giriş tarihinin n yıl sonrasıdır. 29 Şubat'ta işe
-   girenlerin artık olmayan yıllardaki yıldönümü 28 Şubat'tır.
+   girenlerin artık olmayan yıllardaki yıldönümü 28 Şubat'tır. Aynı kural yaş için de geçerlidir:
+   29 Şubat doğumlu çalışan, artık olmayan yıllarda yeni yaşını 28 Şubat'ta doldurur (BR-2; review
+   L1, 2026-10-21).
 3. **Hak ediş miktarı:** n'inci yıldönümünde eklenen gün:
    - n = 1–5 → 14; n = 6–14 → 20; n ≥ 15 → 26 (BR-1).
    - Çalışan o yıldönümü günü tamamlanmış yaşına göre 18 veya daha küçük ya da 50 veya daha büyükse
@@ -46,14 +48,26 @@ Netleştirme kararları (2026-10-21):
    - otomatik hak ediş başlangıç tarihi veya sonrasına düşen;
    - yıldönümü günü çalışan kaydı **aktif** olan.
 
+   - çalışan kaydının sisteme **eklendiği gün veya sonrasına** düşen. Kayıttan önceki dönemi İK
+     açılış düzeltmesiyle girer (review M3, 2026-10-21).
+
    Pasif olduğu dönemde kaçırılan yıldönümü, çalışan yeniden aktif yapılınca sonradan eklenmez;
-   gerekirse İK düzeltmeyle yansıtır.
+   gerekirse İK düzeltmeyle yansıtır. Bu kural ve Gereksinim 6, yalnız otomatik hak ediş başlangıç
+   tarihi girildikten sonra yapılan değişikliklere uygulanır. Kurulum sırasında, başlangıç tarihi
+   girilmeden önce yapılan yeniden aktif yapma ve tarih düzeltmeleri bir sınır oluşturmaz; geçmiş
+   bir başlangıç tarihi bütün çalışanlara aynı biçimde uygulanır (review M3, 2026-10-21).
 5. **Otomatik hak ediş başlangıç tarihi:**
    - İK bu tarihi yönetim panelinden bir kez girer. Girilene kadar hiçbir otomatik hak ediş yapılmaz.
+   - Tarih geçmiş bir gün olabilir (review M3, 2026-10-21).
+   - Tarih değişikliği ile aynı anda yapılan bakiye okumaları, değişiklikten önceki ya da sonraki
+     tarihi tutarlı biçimde kullanır. Okuma eski tarihle hak ediş yazdıysa değişiklik reddedilir
+     (review M1, 2026-10-21).
    - İlk otomatik hak ediş hareketi oluştuktan sonra tarih değiştirilemez.
 6. **Kayıt değişikliği:** İK işe giriş veya doğum tarihini değiştirirse mevcut hak ediş hareketleri
    değişmez. Sonraki yıldönümleri yeni tarihlere göre hesaplanır. Geçmişin düzeltilmesi İK
-   düzeltmesiyle yapılır.
+   düzeltmesiyle yapılır. Defterde hak edişi zaten bulunan bir kıdem yılı, tarih değişse de
+   yeniden oluşmaz. Örneğin işe giriş tarihi ileri kaydırılırsa, hak edişi alınmış yıllar atlanır
+   (review M2, 2026-10-21).
 7. **Düzeltme:** İK yönetim panelinden bir çalışana düzeltme hareketi ekler (BR-12):
    - **Miktar:** sıfırdan farklıdır, 0,5'in katıdır (BR-5), artı veya eksi olabilir ve mutlak
      değeri en fazla 100 gündür.
@@ -71,7 +85,8 @@ Netleştirme kararları (2026-10-21):
     yanmaz, olduğu gibi devreder (BR-11); yıl sonunda hiçbir hareket oluşmaz.
 11. **Çalışanın görünümü:** Giriş yapan kullanıcı ana sayfada **yalnız kendi** bilgilerini görür:
     - **Bakiye:** güncel bakiye.
-    - **Sonraki hak ediş:** tarih ve gün sayısı. Bir sonraki yıldönümü otomatik hak ediş
+    - **Sonraki hak ediş:** gerçekten oluşacak ilk hak edişin tarihi ve gün sayısı; defterde
+      hak edişi bulunan kıdem yılları atlanır (review M2). Bir sonraki yıldönümü otomatik hak ediş
       başlangıç tarihinden önceyse veya başlangıç tarihi girilmemişse bu satır gösterilmez.
     - **Hareket geçmişi:** her harekette tarih, tür (Hak ediş / Düzeltme), miktar (işaretli) ve
       düzeltmelerde gerekçe. Hareketler yeniden eskiye sıralıdır.
@@ -167,6 +182,11 @@ Netleştirme kararları (2026-10-21):
 - [ ] AC-30 — İK yönetim panelinde her çalışanın bakiyesini ve hareketlerini görür, hareketleri çalışana göre süzebilir. İK olmayan kullanıcı panele giremez.
 - [ ] AC-31 — "İzin bakiyem" bölümü yükleniyor, boş, başarı ve hata durumlarında axe denetiminden ihlalsiz geçer ve yalnız klavyeyle gezilebilir.
 - [ ] AC-32 — Spec 0001 ve 0002'nin bütün kabul kriterleri geçerli kalır (regresyon yok).
+- [ ] AC-33 — 29 Şubat doğumlu çalışan, artık olmayan yılda 28 Şubat'a denk gelen yıldönümünde yeni yaşını doldurmuş sayılır (ör. 1976-02-29 doğumluya 2026-02-28'de 50 yaşında 20 gün eklenir).
+- [ ] AC-34 — İK'nın sisteme eklediği çalışan için, kaydın eklendiği günden önceki yıldönümlerine otomatik hak ediş oluşmaz; eklendiği gün veya sonrasındaki yıldönümleri için oluşur.
+- [ ] AC-35 — Başlangıç tarihi girilmeden önce yapılan yeniden aktif yapma veya tarih düzeltmesi sınır oluşturmaz; sonradan girilen geçmiş başlangıç tarihi o çalışanlara da diğerleriyle aynı uygulanır. Başlangıç tarihi geçmiş bir gün olarak kaydedilebilir.
+- [ ] AC-36 — İşe giriş tarihi ileri kaydırılan çalışanın "Sonraki hak ediş" satırı, defterde hak edişi olan kıdem yıllarını atlayıp gerçekten oluşacak ilk hak edişi gösterir; o tarihte o hak ediş oluşur.
+- [ ] AC-37 — Başlangıç tarihi değişikliği, eski tarihle hak ediş yazan eşzamanlı bir bakiye okumasıyla çakışırsa değişiklik reddedilir ve İK'ya form hatası gösterilir (500 değil); ayar ile defter tutarlı kalır.
 
 ## Definition of Done
 - [ ] Every acceptance criterion mapped to proof (test or reproducible observation)
