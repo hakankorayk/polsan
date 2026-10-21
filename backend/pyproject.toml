@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Polsan Leave Manager backend"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "argon2-cffi>=25.1,<26",
     "django>=5.2,<5.3",
     "djangorestframework>=3.17.2,<3.18",
     "drf-spectacular>=0.28",
@@ -34,7 +35,7 @@ extend-exclude = ["*/migrations/*"]
 select = ["E", "W", "F", "I", "N", "B", "UP", "S", "BLE", "SIM", "DJ"]
 
 [tool.ruff.lint.per-file-ignores]
-"**/tests/**" = ["S101", "S603"]
+"**/tests/**" = ["S101", "S105", "S106", "S603"]  # fixed test-only passwords are allowed (docs/security.md)
 "conftest.py" = ["S101"]
 
 [tool.mypy]

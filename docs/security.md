@@ -24,13 +24,34 @@
 ## AuthN / AuthZ
 - **Kimlik doğrulama:** yerel Django hesapları ([ADR 0002](decisions/0002-local-django-accounts.md)).
   - Parola hash: **Argon2**; en az **12 karakter**; Django parola doğrulayıcıları açık.
-  - Başarısız giriş denemeleri sınırlandırılır (hesap/IP kilitleme); uygulama aracı ilk kimlik
-    spec'inde plan onayıyla seçilir.
-  - İşten ayrılan çalışanın hesabını İK **pasifleştirir** (`is_active = False`); hesap silinmez,
-    audit izi korunur.
+  - Giriş kilidi (ADR 0003, `identity/domain/throttle.py`):
+    - Aynı kullanıcı adına son 15 dakikada 5 hatalı denemede 15 dakika kilit.
+    - Var olmayan kullanıcı adı da aynı işlenir; başarılı giriş sayacı sıfırlar.
+    - Hatalı parola, var olmayan kullanıcı ve pasif hesap aynı yanıtı alır.
+    - Tek giriş yolu bu kilitli uygulama girişidir; yönetim panelinin kendi giriş formu `/`'e
+      yönlendirir.
+  - İK geçici parola verir (Django admin); geçici parolayla giren kullanıcı parolasını
+    değiştirmeden hiçbir uca erişemez (`PasswordChangeCompleted`, `password_change_required`).
+  - İlk İK hesabı `manage.py create_first_hr` ile açılır; parola komut satırına yazılmaz
+    (`FIRST_HR_PASSWORD` veya etkileşimli). Son aktif İK'nın yetkisi kaldırılamaz, pasif yapılamaz.
+  - İşten ayrılan çalışanın hesabını İK **pasifleştirir** (`is_active = False`); hesap silinmez
+    (yönetim panelinde silme kapalı), audit izi korunur. Pasif hesap veya pasif çalışanın açık
+    oturumu bir sonraki istekte sona erer (`identity.backends.EmployeeAwareBackend`).
   - `identity` modülü kimlik doğrulama arka ucunu değiştirilebilir tutar (ileride AD/Entra ID).
 - **Oturum:** SPA aynı origin'den sunulur; Django session cookie (`HttpOnly`, `Secure`,
   `SameSite=Lax`) + **CSRF** token. JWT ve localStorage'da token yoktur.
+  - 30 dakika işlem yapılmazsa oturum biter (kayan süre); "beni hatırla" yoktur.
+  - Giriş isteği de CSRF korumalıdır: DRF anonim isteklerde CSRF'i atladığı için `LoginView`
+    bunu kendisi uygular.
+- **Yönetim paneli:** `/admin/`, yalnız İK (aktif hesap + İK yetkisi + tamamlanmış parola
+  değişimi) içindir (`config/admin.py`, `HRAdminSite`).
+  - Kabul edilen risk (review L3): Son İK kontrolü kayıtla aynı kilit altında yapılmıyor. İki
+    İK aynı anda birbirinin yetkisini kaldırırsa aktif İK sayısı 0'a düşebilir. Olasılık çok
+    düşük ve `manage.py create_first_hr` (aktif İK yoksa çalışır) ile kurtarılır.
+  - Bilinçli istisna (review L9): Django admin'in kendi "parolamı değiştir" ekranı
+    (`/admin/password_change/`) İK'ya açık kalır. Spec 0002 kullanıcıların kalıcı parolasını
+    kendisinin değiştirmesini kapsam dışı sayıyor; ancak bu ekran eski parolayı ve aynı parola
+    doğrulayıcılarını istediği için risk düşük. Uygulama içi ekran gelince yeniden ele alınır.
 - **Yetkilendirme — varsayılan reddet:** DRF `DEFAULT_PERMISSION_CLASSES` = kimliği doğrulanmış +
   açık izin; her uç kendi rol/nesne kontrolünü bildirir. Yetkisiz uç bir mimari testle yakalanır.
 - **Nesne düzeyinde yetki (yalnızca sunucuda):**
