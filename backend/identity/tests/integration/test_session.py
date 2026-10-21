@@ -35,6 +35,7 @@ def test_activity_keeps_session_alive(client, make_user) -> None:
     assert client.get("/api/me/").status_code == 200
     renewed = Session.objects.get(session_key=_session_key(client)).expire_date
     assert renewed > timezone.now() + timedelta(minutes=29)
+    assert renewed <= timezone.now() + timedelta(minutes=30)  # the idle limit is 30 minutes
 
 
 def test_deactivated_account_or_employee_session_ends(client, make_user, make_employee) -> None:
